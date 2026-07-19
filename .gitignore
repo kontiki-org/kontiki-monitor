@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+.venv/
+dist/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.poetry/
+/tmp/
+*.log
+/data/
+/logs/
+stack/telegram_notifier_bot_token.yaml

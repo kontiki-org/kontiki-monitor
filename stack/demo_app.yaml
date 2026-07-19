@@ -1,0 +1,9 @@
+logging:
+  handlers:
+    file:
+      filename: /data/demo_app_service.log
+
+# Fast heartbeats so set_degraded shows up quickly in the Registry.
+kontiki:
+  heartbeat:
+    interval: 5

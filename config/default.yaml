@@ -1,0 +1,8 @@
+logging:
+  handlers:
+    file:
+      filename: /data/kontiki_monitor.log
+
+kontiki-monitor:
+  category: "kontiki.registry"
+  poll_interval_seconds: 30

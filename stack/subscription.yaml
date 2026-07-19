@@ -1,0 +1,85 @@
+kontiki:
+  http:
+    address: "0.0.0.0"
+    port: 8002
+
+logging:
+  handlers:
+    file:
+      filename: /data/subscription_service.log
+
+app:
+  storage:
+    backend: sqlite
+    sqlite_path: /data/subscriptions.db
+
+  # Embedded: Registry only (no earthquake demo connector).
+  alert_connectors:
+    - kontiki-monitor
+
+  notification_channels:
+    - email-notifier-service
+    - telegram-notifier-service
+
+  # Declarative ops subscriptions (recipient_id = owner_id at dispatch).
+  subscriptions:
+    platform-ops:
+      demo-app-degraded:
+        status: active
+        subscription:
+          rule:
+            category: kontiki.registry
+            event_type: instance_state_changed
+            criteria:
+              all_of:
+                - key: service_name
+                  operator: eq
+                  value: demo-app-service
+                - key: new_state
+                  operator: eq
+                  value: degraded
+          endpoints:
+            - telegram.ops_alerts
+            - email.oncall
+      registry-exceptions:
+        status: active
+        subscription:
+          rule:
+            category: kontiki.registry
+            event_type: exception_recorded
+            criteria:
+              all_of:
+                - key: "*"
+                  operator: eq
+                  value: "*"
+          endpoints:
+            - telegram.ops_alerts
+            - email.oncall
+      fleet-service-missing:
+        status: active
+        subscription:
+          rule:
+            category: kontiki.registry
+            event_type: expected_service_missing
+            criteria:
+              all_of:
+                - key: "*"
+                  operator: eq
+                  value: "*"
+          endpoints:
+            - telegram.ops_alerts
+            - email.oncall
+      fleet-insufficient-instances:
+        status: active
+        subscription:
+          rule:
+            category: kontiki.registry
+            event_type: insufficient_active_instances
+            criteria:
+              all_of:
+                - key: "*"
+                  operator: eq
+                  value: "*"
+          endpoints:
+            - telegram.ops_alerts
+            - email.oncall

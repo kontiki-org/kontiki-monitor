@@ -1,0 +1,33 @@
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "kontiki-monitor"
+version = "0.1.0"
+description = "Kontiki Registry fleet monitor — emits alert.normalized for Boomerang."
+authors = ["Boomerang"]
+readme = "README.md"
+packages = [{ include = "kontiki_monitor", from = "src" }]
+
+[tool.poetry.dependencies]
+python = ">=3.11,<4.0"
+kontiki = ">=1.2.0"
+pydantic = "^2.0.0"
+aiohttp = ">=3.9.0"
+boomerang-contracts = { path = "../boomerang/packages/boomerang-contracts", develop = true }
+
+[tool.poetry.group.dev.dependencies]
+behave = "^1.2.6"
+pyyaml = "^6.0.0"
+
+[tool.poetry.scripts]
+kontiki-monitor = "kontiki_monitor.main:run"
+
+[tool.black]
+line-length = 88
+
+[tool.isort]
+profile = "black"
+line_length = 88
+known_first_party = ["kontiki_monitor"]

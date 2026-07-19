@@ -1,0 +1,20 @@
+# Embedded overlay (fleet expectations + ops HTTP).
+# Loaded after config/default.yaml by Boomerang docker-compose.embedded.yaml.
+
+kontiki:
+  http:
+    address: "0.0.0.0"
+    port: 8091
+
+kontiki-monitor:
+  expected_services:
+    demo-app-service:
+      min_active: 1
+    subscription-service:
+      min_active: 1
+    alert-engine-service:
+      min_active: 1
+    email-notifier-service:
+      min_active: 1
+    telegram-notifier-service:
+      min_active: 1

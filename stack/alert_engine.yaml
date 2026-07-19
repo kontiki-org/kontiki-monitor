@@ -1,0 +1,11 @@
+logging:
+  handlers:
+    file:
+      filename: /data/alert_engine_service.log
+
+app:
+  http:
+    token: "change-me"
+  rpc:
+    subscription_service_name: subscription-service
+

@@ -1,0 +1,22 @@
+kontiki:
+  http:
+    address: "0.0.0.0"
+    port: 8004
+
+logging:
+  handlers:
+    file:
+      filename: /data/telegram_notifier_service.log
+
+app:
+  storage:
+    sqlite_path: /data/telegram_notifier.sqlite3
+
+  telegram:
+    api_base_url: https://api.telegram.org
+    # bot_token: provide via stack/telegram_notifier_bot_token.yaml (gitignored).
+
+  # Flat endpoint registry (local ops chat — was previously only in SQLite via UI).
+  endpoints:
+    ops_alerts:
+      chat_id: "442226941"

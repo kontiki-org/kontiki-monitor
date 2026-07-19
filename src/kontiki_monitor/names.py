@@ -1,0 +1,1 @@
+KONTIKI_MONITOR_SERVICE_NAME = "kontiki-monitor"
