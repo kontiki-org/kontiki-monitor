@@ -5,6 +5,12 @@ BOOMERANG_DIR ?= ../boomerang
 install:
 	poetry install
 
+run-amqp:
+	docker compose up -d --wait --wait-timeout 180 rabbitmq
+
+down-amqp:
+	docker compose stop rabbitmq 2>/dev/null || true
+
 # Needs RabbitMQ on localhost (e.g. make stack-up, or Boomerang run-dev-platform-no-registry).
 integration-test:
 	PYTHONPATH=. poetry run behave tests/integration --stop
