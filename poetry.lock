@@ -257,17 +257,15 @@ name = "boomerang-contracts"
 version = "0.1.0"
 description = "Shared Boomerang alert and notification contracts."
 optional = false
-python-versions = ">=3.11,<4.0"
+python-versions = "<4.0,>=3.11"
 groups = ["main"]
-files = []
-develop = true
+files = [
+    {file = "boomerang_contracts-0.1.0-py3-none-any.whl", hash = "sha256:2da4b98ce0948836f70cdb43bd85ca0ac1006b2d6155d395a95462a973dac391"},
+    {file = "boomerang_contracts-0.1.0.tar.gz", hash = "sha256:f97787f4599c2c840728de172df18f8c2e1a25f98fd6e1a1bf33e07a1d57cdbb"},
+]
 
 [package.dependencies]
-pydantic = "^2.0.0"
-
-[package.source]
-type = "directory"
-url = "../boomerang/packages/boomerang-contracts"
+pydantic = ">=2.0.0,<3.0.0"
 
 [[package]]
 name = "colorama"
@@ -1213,4 +1211,4 @@ propcache = ">=0.2.1"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11,<4.0"
-content-hash = "246a613cb34fdfef81af5a1809072705639b8d9c3b4d1d39057da6bf9b416b6b"
+content-hash = "58ae99d14e38ca52fa98110cdeeaab1bb24e54fb5ba89e56ecbf935783fbf647"

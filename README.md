@@ -4,13 +4,13 @@ Judges Kontiki Registry state (fleet expectations + registry bus events) and pub
 `alert.normalized` for Boomerang.
 
 Boomerang does **not** depend on this repo. This repo owns the **embedded ops stack**
-that pulls Boomerang images from a sibling checkout.
+and builds Boomerang service images from PyPI (`kontiki-boomerang`).
 
 ## Dependencies
 
 - `kontiki>=1.2.0`
-- `boomerang-contracts` (path: `../boomerang/packages/boomerang-contracts` until PyPI)
-- Sibling `../boomerang` for Docker builds of Boomerang services
+- `boomerang-contracts>=0.1.0,<0.2.0` (PyPI)
+- Embedded stack images: `kontiki-boomerang>=0.1.0,<0.2.0` and `kontiki` (PyPI, via Dockerfiles)
 
 ## Local install
 
@@ -32,20 +32,17 @@ Boomerang presets: `stack/subscription.yaml`, `stack/email_notifier.yaml`, …
 
 ## Integration tests
 
-Start a bus **without** the real Registry (Behave owns `ServiceRegistry`):
+Behave owns a `ServiceRegistry` mock on the bus — start **RabbitMQ only** (no real Registry):
 
 ```bash
-# from Boomerang (bus only)
-make run-dev-platform-no-registry
-
-# from this repo
+make run-amqp
 make integration-test
 ```
 
+Do not use Boomerang `make run-dev-platform` for these tests: it starts a real Registry and conflicts with the mock.
+
 ## Docker (monitor image alone)
 
-Build from the parent of both repos:
-
 ```bash
-docker build -f kontiki-monitor/Dockerfile -t kontiki-monitor .
+docker build -t kontiki-monitor .
 ```

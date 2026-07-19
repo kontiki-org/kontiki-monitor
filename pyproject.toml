@@ -15,7 +15,7 @@ python = ">=3.11,<4.0"
 kontiki = ">=1.2.0"
 pydantic = "^2.0.0"
 aiohttp = ">=3.9.0"
-boomerang-contracts = { path = "../boomerang/packages/boomerang-contracts", develop = true }
+boomerang-contracts = ">=0.1.0,<0.2.0"
 
 [tool.poetry.group.dev.dependencies]
 behave = "^1.2.6"

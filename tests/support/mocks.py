@@ -31,7 +31,7 @@ class AlertNormalizedEventCatcher(MockService):
 
 
 class ServiceRegistryMock(MockService):
-    """Sole ServiceRegistry on the bus when using run-dev-platform-no-registry."""
+    """Sole ServiceRegistry on the bus when tests use RabbitMQ only (make run-amqp)."""
 
     name = "ServiceRegistry"
 

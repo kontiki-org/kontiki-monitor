@@ -3,11 +3,17 @@
 # Assembles: RabbitMQ + Registry + kontiki-monitor + Boomerang (subscription,
 # alert-engine, email, telegram) + demo-app + MailHog.
 #
-# Requires sibling checkout: ../boomerang (for Boomerang image build).
+# Boomerang runtime images install kontiki-boomerang from PyPI (no sibling checkout).
 #
 #   make stack-up
 
 name: kontiki-monitor-embedded
+
+x-boomerang-image: &boomerang-image
+  build:
+    context: .
+    dockerfile: Dockerfile.boomerang
+  image: kontiki-monitor-boomerang:local
 
 services:
   rabbitmq:
@@ -27,8 +33,9 @@ services:
 
   kontiki-registry:
     build:
-      context: ../boomerang
+      context: .
       dockerfile: Dockerfile.kontiki-registry
+    image: kontiki-monitor-registry:local
     container_name: km-kontiki-registry
     command: >
       kontiki_registry --config /stack/common.docker.yaml --config /stack/kontiki_registry.yaml
@@ -39,12 +46,19 @@ services:
       - ./stack:/stack:ro
       - ./logs:/logs
     restart: unless-stopped
+    # PID 1 is kontiki_registry; start_period covers AMQP connect after rabbitmq-healthy.
     healthcheck:
-      test: ["CMD", "python", "-c", "import glob; raise SystemExit(0 if any('kontiki_registry' in open(p,'rb').read().decode('utf-8','ignore') for p in glob.glob('/proc/[0-9]*/cmdline')) else 1)"]
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "from pathlib import Path; raise SystemExit(0 if b'kontiki_registry' in Path('/proc/1/cmdline').read_bytes() else 1)",
+        ]
       interval: 5s
       timeout: 5s
       retries: 40
-      start_period: 20s
+      start_period: 40s
 
   mailhog:
     image: mailhog/mailhog
@@ -55,8 +69,7 @@ services:
     restart: unless-stopped
 
   subscription-service:
-    build:
-      context: ../boomerang
+    <<: *boomerang-image
     container_name: km-subscription-service
     command: >
       boomerang-subscription
@@ -80,8 +93,7 @@ services:
       retries: 30
 
   email-notifier-service:
-    build:
-      context: ../boomerang
+    <<: *boomerang-image
     container_name: km-email-notifier-service
     command: >
       boomerang-email-notifier
@@ -97,18 +109,11 @@ services:
     volumes:
       - ./stack:/stack:ro
       - ./data:/data
-    ports:
-      - "8003:8003"
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "python -c 'import urllib.request; urllib.request.urlopen(\"http://127.0.0.1:8003/api/v1/docs\", timeout=2).read(); print(\"ok\")'"]
-      interval: 5s
-      timeout: 3s
-      retries: 30
+    # No HTTP surface (bus-only) — do not healthcheck /api/v1/docs.
 
   telegram-notifier-service:
-    build:
-      context: ../boomerang
+    <<: *boomerang-image
     container_name: km-telegram-notifier-service
     command: >
       sh -c 'EXTRA=""; if [ -f /stack/telegram_notifier_bot_token.yaml ]; then EXTRA="--config /stack/telegram_notifier_bot_token.yaml"; fi;
@@ -121,18 +126,11 @@ services:
     volumes:
       - ./stack:/stack:ro
       - ./data:/data
-    ports:
-      - "8004:8004"
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "python -c 'import urllib.request; urllib.request.urlopen(\"http://127.0.0.1:8004/api/v1/docs\", timeout=2).read(); print(\"ok\")'"]
-      interval: 5s
-      timeout: 3s
-      retries: 30
+    # No HTTP surface (bus-only). Same as email-notifier-service.
 
   alert-engine-service:
-    build:
-      context: ../boomerang
+    <<: *boomerang-image
     container_name: km-alert-engine-service
     command: >
       boomerang-alert-engine
@@ -152,8 +150,9 @@ services:
 
   kontiki-monitor:
     build:
-      context: ..
-      dockerfile: kontiki-monitor/Dockerfile
+      context: .
+      dockerfile: Dockerfile
+    image: kontiki-monitor:local
     container_name: kontiki-monitor
     command: >
       kontiki-monitor
@@ -176,8 +175,7 @@ services:
     restart: unless-stopped
 
   demo-app-service:
-    build:
-      context: ../boomerang
+    <<: *boomerang-image
     container_name: km-demo-app-service
     command: >
       boomerang-demo-app

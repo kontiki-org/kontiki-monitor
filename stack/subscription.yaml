@@ -9,10 +9,6 @@ logging:
       filename: /data/subscription_service.log
 
 app:
-  storage:
-    backend: sqlite
-    sqlite_path: /data/subscriptions.db
-
   # Embedded: Registry only (no earthquake demo connector).
   alert_connectors:
     - kontiki-monitor

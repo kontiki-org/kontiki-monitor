@@ -30,11 +30,8 @@ def write_temp_config(config):
 def start_kontiki_subprocess(service_entrypoint, config):
     config_path = write_temp_config(config)
     root = repo_root()
-    contracts_src = (
-        root.parent / "boomerang" / "packages" / "boomerang-contracts" / "src"
-    )
     env = os.environ.copy()
-    path_parts = [str(root / "src"), str(contracts_src)]
+    path_parts = [str(root / "src")]
     existing = env.get("PYTHONPATH", "")
     if existing:
         path_parts.append(existing)
