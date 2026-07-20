@@ -15,6 +15,15 @@ fleet state, registry bus events, and local disk occupation, then publish
 | `kontiki-monitor` | `kontiki-monitor` | `kontiki-monitor:` in `config/default.yaml` (+ `config/embedded.yaml`) | Fleet expectations and Registry bus events → alerts |
 | `host-check-service` | `host-check-service` | `host-check:` in `config/host-check.yaml` | Local disk occupation (warning/critical %, paths); one instance per host |
 
+### Where it shines
+
+This suite fits best when the platform **is** Kontiki (plus maybe a thin UI), the team is
+small, and the same stack must be **deployed and supported many times** — including
+on-premise at customer sites. You get run / see / get-alerted without standing up a
+separate observability plant on every install. Reach for heavier tooling when you need
+cross-stack SLOs, deep performance forensics, or org-wide metrics at scale — not as the
+default for operating Kontiki services day to day.
+
 ---
 
 ## Quickstart — demo-app → Telegram
