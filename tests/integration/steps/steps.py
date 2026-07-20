@@ -1,18 +1,25 @@
 import json
+import subprocess
 import time
 
 import yaml
 from behave import given, then, when
 from pydantic import BaseModel
 
-# Must match poll_interval_seconds in @fleet_state / @alert_silences feature configs.
+# Must match poll_interval_seconds in @fleet_state / @alert_silences / @disk configs.
 FLEET_TEST_POLL_INTERVAL_SECONDS = 8
+DISK_TEST_POLL_INTERVAL_SECONDS = 8
 
-from tests.integration.utils import start_kontiki_monitor_subprocess
+from tests.integration.utils import (
+    start_host_check_for_scenario,
+    start_kontiki_monitor_subprocess,
+)
+from tests.support.disk_fixture import set_mount_used_percent
 from tests.support.harness import http_request
 
 CATCHER = "alert-normalized-event-catcher"
 SUT_NAME = "kontiki-monitor"
+HOST_CHECK_NAME = "host-check-service"
 PUBLISHER_NAME = "notification-publisher"
 REGISTRY_MOCK = "ServiceRegistry"
 SILENCE_RPC_METHODS = ("add_silence", "clear_silence")
@@ -92,6 +99,51 @@ def step_service_running_with_configuration(context):
     address = http_cfg.get("address") or "127.0.0.1"
     if port is not None:
         _wait_for_http("http://%s:%s" % (address, port))
+
+
+@given("the host-check-service is running with the following configuration")
+def step_host_check_running_with_configuration(context):
+    config = yaml.safe_load(context.text.strip()) or {}
+    start_host_check_for_scenario(context, config)
+    time.sleep(5)
+    proc = context.host_check_process
+    if proc is not None and proc.poll() is not None:
+        stderr = (
+            proc.stderr.read().decode(errors="replace") if proc.stderr else ""
+        ) or "(empty)"
+        raise RuntimeError(
+            "host-check-service subprocess exited before step. stderr:\n%s" % stderr
+        )
+    fixture = context.host_check_disk_fixture
+    if fixture is not None:
+        name = fixture["container_name"]
+        running = subprocess.check_output(
+            ["docker", "inspect", "-f", "{{.State.Running}}", name],
+            text=True,
+        ).strip()
+        if running != "true":
+            logs = subprocess.check_output(["docker", "logs", name], text=True)
+            raise RuntimeError(
+                "host-check-service container not running. logs:\n%s" % logs
+            )
+
+
+@when("a disk usage poll observes the mounts filled as follows")
+def step_disk_poll_observes_mounts_filled(context):
+    fixture = context.host_check_disk_fixture
+    assert fixture, "host-check disk fixture container is not running"
+    host_by_container = fixture["host_by_container"]
+    for row in context.table:
+        container_path = row["path"]
+        percent = row["percent"]
+        host_dir = host_by_container.get(container_path)
+        assert host_dir, "No host bind for mount %s" % container_path
+        actual = set_mount_used_percent(host_dir, percent)
+        assert actual == int(
+            percent
+        ), "Mount %s filled to %s%%, expected %s%%" % (container_path, actual, percent)
+    context.manager.clean_events(CATCHER)
+    time.sleep(DISK_TEST_POLL_INTERVAL_SECONDS + 5)
 
 
 @when('a "{event_type}" event is published with payload')
@@ -196,6 +248,21 @@ def step_call_rpc(context, method_name):
         context.last_rpc_error = exc
 
 
+@when(
+    "I call the RPC {method_name} on the host-check-service with the following arguments"
+)
+def step_call_host_check_rpc(context, method_name):
+    payload = json.loads(context.text.strip()) if context.text else {}
+    context.last_rpc_error = None
+    try:
+        context.last_rpc_result = context.runner.call(
+            HOST_CHECK_NAME, method_name, **payload
+        )
+    except Exception as exc:
+        context.last_rpc_result = None
+        context.last_rpc_error = exc
+
+
 @then("the kontiki-monitor RPC call succeeds")
 def step_rpc_succeeds(context):
     if context.last_rpc_error is not None:
@@ -204,8 +271,23 @@ def step_rpc_succeeds(context):
         )
 
 
+@then("the host-check-service RPC call succeeds")
+def step_host_check_rpc_succeeds(context):
+    if context.last_rpc_error is not None:
+        raise AssertionError(
+            "Expected RPC success, got error: %s" % context.last_rpc_error
+        )
+
+
 @then("the kontiki-monitor RPC response is")
 def step_rpc_response_is(context):
+    expected = json.loads(context.text.strip()) if context.text else {}
+    actual = _payload_as_dict(context.last_rpc_result)
+    assert actual == expected, "Expected %s, got %s" % (expected, actual)
+
+
+@then("the host-check-service RPC response is")
+def step_host_check_rpc_response_is(context):
     expected = json.loads(context.text.strip()) if context.text else {}
     actual = _payload_as_dict(context.last_rpc_result)
     assert actual == expected, "Expected %s, got %s" % (expected, actual)

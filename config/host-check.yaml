@@ -1,0 +1,14 @@
+logging:
+  handlers:
+    file:
+      filename: /data/host_check_service.log
+
+host-check:
+  # Stable alias for subscriptions / alert_id (not necessarily OS hostname).
+  host: "local"
+  category: "kontiki.host"
+  poll_interval_seconds: 30
+  warning_used_percent: 90
+  critical_used_percent: 95
+  paths:
+    - /

@@ -3,6 +3,7 @@ import time
 
 from kontiki.testing import MockServiceManager, MockServiceRunner
 
+from tests.support.disk_fixture import stop_host_check_disk_container
 from tests.support.harness import safe_unlink
 from tests.support.mocks import (
     AlertNormalizedEventCatcher,
@@ -11,10 +12,24 @@ from tests.support.mocks import (
 )
 
 
+def _stop_process(proc):
+    if proc is None:
+        return
+    proc.terminate()
+    try:
+        proc.wait(timeout=5)
+    except subprocess.TimeoutExpired:
+        proc.kill()
+        proc.wait(timeout=5)
+
+
 def before_all(context):
     time.sleep(1)
     context.kontiki_monitor_process = None
     context.kontiki_monitor_config_path = None
+    context.host_check_process = None
+    context.host_check_config_path = None
+    context.host_check_disk_fixture = None
     context.last_rpc_result = None
     context.last_rpc_error = None
     context.last_http_status = None
@@ -42,17 +57,19 @@ def before_scenario(context, scenario):
 
 def after_scenario(context, scenario):
     _ = scenario
-    if context.kontiki_monitor_process is not None:
-        context.kontiki_monitor_process.terminate()
-        try:
-            context.kontiki_monitor_process.wait(timeout=5)
-        except subprocess.TimeoutExpired:
-            context.kontiki_monitor_process.kill()
-            context.kontiki_monitor_process.wait(timeout=5)
-        context.kontiki_monitor_process = None
-
+    _stop_process(context.kontiki_monitor_process)
+    context.kontiki_monitor_process = None
     safe_unlink(context.kontiki_monitor_config_path)
     context.kontiki_monitor_config_path = None
+
+    _stop_process(context.host_check_process)
+    context.host_check_process = None
+    safe_unlink(context.host_check_config_path)
+    context.host_check_config_path = None
+
+    stop_host_check_disk_container(context.host_check_disk_fixture)
+    context.host_check_disk_fixture = None
+
     context.manager.clean_events("alert-normalized-event-catcher")
 
 

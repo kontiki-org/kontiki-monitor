@@ -1,0 +1,4 @@
+# Copy to telegram_notifier_bot_token.yaml (gitignored) and set your BotFather token.
+app:
+  telegram:
+    bot_token: "YOUR_BOT_TOKEN"
