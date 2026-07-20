@@ -4,6 +4,7 @@
 # alert-engine, email, telegram) + demo-app + MailHog.
 #
 # Boomerang runtime images install kontiki-boomerang from PyPI (no sibling checkout).
+# Liveness: Kontiki 1.3+ GET /live/<service_name> on the registry.
 #
 #   make stack-up
 
@@ -46,14 +47,11 @@ services:
       - ./stack:/stack:ro
       - ./logs:/logs
     restart: unless-stopped
-    # PID 1 is kontiki_registry; start_period covers AMQP connect after rabbitmq-healthy.
     healthcheck:
       test:
         [
-          "CMD",
-          "python",
-          "-c",
-          "from pathlib import Path; raise SystemExit(0 if b'kontiki_registry' in Path('/proc/1/cmdline').read_bytes() else 1)",
+          "CMD-SHELL",
+          "python -c 'import urllib.request; urllib.request.urlopen(\"http://127.0.0.1:8080/live/ServiceRegistry\", timeout=2).read()'",
         ]
       interval: 5s
       timeout: 5s
@@ -87,10 +85,15 @@ services:
       - "8002:8002"
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "python -c 'import urllib.request; urllib.request.urlopen(\"http://127.0.0.1:8002/api/v1/docs\", timeout=2).read(); print(\"ok\")'"]
+      test:
+        [
+          "CMD-SHELL",
+          "python -c 'import urllib.request; urllib.request.urlopen(\"http://kontiki-registry:8080/live/subscription-service\", timeout=2).read()'",
+        ]
       interval: 5s
       timeout: 3s
       retries: 30
+      start_period: 30s
 
   email-notifier-service:
     <<: *boomerang-image
@@ -110,7 +113,16 @@ services:
       - ./stack:/stack:ro
       - ./data:/data
     restart: unless-stopped
-    # No HTTP surface (bus-only) — do not healthcheck /api/v1/docs.
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "python -c 'import urllib.request; urllib.request.urlopen(\"http://kontiki-registry:8080/live/email-notifier-service\", timeout=2).read()'",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 30s
 
   telegram-notifier-service:
     <<: *boomerang-image
@@ -127,7 +139,16 @@ services:
       - ./stack:/stack:ro
       - ./data:/data
     restart: unless-stopped
-    # No HTTP surface (bus-only). Same as email-notifier-service.
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "python -c 'import urllib.request; urllib.request.urlopen(\"http://kontiki-registry:8080/live/telegram-notifier-service\", timeout=2).read()'",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 30s
 
   alert-engine-service:
     <<: *boomerang-image
@@ -142,11 +163,21 @@ services:
       kontiki-registry:
         condition: service_healthy
       subscription-service:
-        condition: service_started
+        condition: service_healthy
     volumes:
       - ./stack:/stack:ro
       - ./data:/data
     restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "python -c 'import urllib.request; urllib.request.urlopen(\"http://kontiki-registry:8080/live/alert-engine-service\", timeout=2).read()'",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 30s
 
   kontiki-monitor:
     build:
@@ -165,7 +196,7 @@ services:
       kontiki-registry:
         condition: service_healthy
       alert-engine-service:
-        condition: service_started
+        condition: service_healthy
     volumes:
       - ./stack:/stack:ro
       - ./data:/data
@@ -173,6 +204,16 @@ services:
     ports:
       - "8091:8091"
     restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "python -c 'import urllib.request; urllib.request.urlopen(\"http://kontiki-registry:8080/live/kontiki-monitor\", timeout=2).read()'",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 30s
 
   demo-app-service:
     <<: *boomerang-image
@@ -190,3 +231,13 @@ services:
       - ./stack:/stack:ro
       - ./data:/data
     restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "python -c 'import urllib.request; urllib.request.urlopen(\"http://kontiki-registry:8080/live/demo-app-service\", timeout=2).read()'",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 30s

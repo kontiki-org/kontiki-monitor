@@ -8,9 +8,9 @@ and builds Boomerang service images from PyPI (`kontiki-boomerang`).
 
 ## Dependencies
 
-- `kontiki>=1.2.0`
+- `kontiki>=1.3.0`
 - `boomerang-contracts>=0.1.0,<0.2.0` (PyPI)
-- Embedded stack images: `kontiki-boomerang>=0.1.0,<0.2.0` and `kontiki` (PyPI, via Dockerfiles)
+- Embedded stack images: `kontiki-boomerang>=0.1.0,<0.2.0` and `kontiki>=1.3.0` (PyPI, via Dockerfiles)
 
 ## Local install
 
