@@ -125,5 +125,3 @@ poetry install
 make run-amqp
 make integration-test
 ```
-
-Do not use Boomerang `make run-dev-platform` for these tests: it starts a real Registry and conflicts with the mock.
