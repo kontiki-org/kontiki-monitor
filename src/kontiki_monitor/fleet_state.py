@@ -3,6 +3,7 @@
 from datetime import datetime, timedelta, timezone
 
 from boomerang_contracts.alert.normalized import NormalizedAlert
+
 from kontiki_monitor.names import KONTIKI_MONITOR_SERVICE_NAME
 
 CONDITION_MISSING = "missing"

@@ -1,11 +1,11 @@
 import logging
 
 from aiohttp import web
+from boomerang_contracts.alert.normalized import ALERT_NORMALIZED_EVENT
 from kontiki.messaging import Messenger, on_event, rpc, rpc_error
 from kontiki.task.task import task
 from kontiki.web.web import http
 
-from boomerang_contracts.alert.normalized import ALERT_NORMALIZED_EVENT
 from kontiki_monitor.alert_mapping import (
     REGISTRY_EVENT_EXCEPTION_RECORDED,
     REGISTRY_EVENT_INSTANCE_DEREGISTERED,

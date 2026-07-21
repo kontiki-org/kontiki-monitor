@@ -4,6 +4,7 @@ from boomerang_contracts.alert.catalog import (
     AlertCriterionDescriptor,
     AlertEventTypeCatalog,
 )
+
 from kontiki_monitor.names import KONTIKI_MONITOR_SERVICE_NAME
 
 REGISTRY_CATEGORY = "kontiki.registry"

@@ -4,6 +4,7 @@ import shutil
 from datetime import datetime, timedelta, timezone
 
 from boomerang_contracts.alert.normalized import NormalizedAlert
+
 from kontiki_host_check.names import HOST_CHECK_SERVICE_NAME
 
 DISK_SPACE_HIGH = "disk_space_high"

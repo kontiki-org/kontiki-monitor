@@ -1,9 +1,9 @@
 import logging
 
+from boomerang_contracts.alert.normalized import ALERT_NORMALIZED_EVENT
 from kontiki.messaging import Messenger, rpc
 from kontiki.task.task import task
 
-from boomerang_contracts.alert.normalized import ALERT_NORMALIZED_EVENT
 from kontiki_host_check.delegate import HostCheckDelegate
 from kontiki_host_check.disk_state import DISK_POLL_INTERVAL_CONFIG_KEY
 from kontiki_host_check.names import HOST_CHECK_SERVICE_NAME

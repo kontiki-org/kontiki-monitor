@@ -1,13 +1,44 @@
+# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
+*$py.class
+
+# Virtual environments
 .venv/
+.poetry/
+
+# Distribution / packaging
+build/
 dist/
 *.egg-info/
+
+# Coverage / test artifacts
 .pytest_cache/
 .mypy_cache/
-.poetry/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# IDE / editor
+.vscode/
+.idea/
+.cursor/
+
+# Local Python version (pyenv)
+.python-version
+
+# Runtime data / logs (local stack volumes)
+data/
+logs/
 /tmp/
 *.log
-/data/
-/logs/
+
+# Local stack secrets
 stack/telegram_notifier_bot_token.yaml
+.env
+.env.*
+!.env.example
+
+# SQLite / local DBs outside ignored data/ (safety net)
+*.sqlite3
+*.db

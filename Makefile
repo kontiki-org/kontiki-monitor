@@ -1,8 +1,12 @@
 .PHONY: \
-	install run-amqp down-amqp \
+	install fmt lint check \
+	run-amqp down-amqp \
 	integration-test integration-test-tag \
 	stack-up stack-down \
 	demo-app-degrade demo-app-recover demo-app-status
+
+PY ?= poetry run python
+SRC = src
 
 BOOMERANG_IMAGE ?= kontiki-monitor-boomerang:local
 DEMO_APP_CLI = docker run --rm --network host $(BOOMERANG_IMAGE) \
@@ -10,6 +14,15 @@ DEMO_APP_CLI = docker run --rm --network host $(BOOMERANG_IMAGE) \
 
 install:
 	poetry install
+
+fmt:
+	$(PY) -m isort $(SRC)
+	$(PY) -m black $(SRC)
+
+lint:
+	$(PY) -m flake8 $(SRC)
+
+check: fmt lint
 
 # RabbitMQ only — Behave owns ServiceRegistryMock (do not start a real Registry).
 run-amqp:

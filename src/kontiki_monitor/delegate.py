@@ -5,22 +5,14 @@ from kontiki.delegate import ServiceDelegate
 from kontiki.registry import ServiceRegistryProxy
 
 from kontiki_monitor.alert_mapping import registry_event_to_normalized_alert
-from kontiki_monitor.catalog import (
-    REGISTRY_CATEGORY,
-    build_alert_subscription_catalog,
-)
-from kontiki_monitor.fleet_state import (
-    FleetStateTracker,
-    parse_expected_services,
-)
+from kontiki_monitor.catalog import REGISTRY_CATEGORY, build_alert_subscription_catalog
+from kontiki_monitor.fleet_state import FleetStateTracker, parse_expected_services
 from kontiki_monitor.names import KONTIKI_MONITOR_SERVICE_NAME
 from kontiki_monitor.silences import SilenceStore
 
 
 def _service_config(config, key, default=None):
-    return get_parameter(
-        config, "%s.%s" % (KONTIKI_MONITOR_SERVICE_NAME, key), default
-    )
+    return get_parameter(config, "%s.%s" % (KONTIKI_MONITOR_SERVICE_NAME, key), default)
 
 
 class KontikiMonitorDelegate(ServiceDelegate):

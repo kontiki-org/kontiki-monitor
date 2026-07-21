@@ -5,7 +5,11 @@ from kontiki.configuration.parameter import get_parameter
 from kontiki.delegate import ServiceDelegate
 
 from kontiki_host_check.catalog import HOST_CATEGORY, build_alert_subscription_catalog
-from kontiki_host_check.disk_state import DiskStateTracker, collect_disk_state, parse_paths
+from kontiki_host_check.disk_state import (
+    DiskStateTracker,
+    collect_disk_state,
+    parse_paths,
+)
 from kontiki_host_check.names import HOST_CHECK_CONFIG_PREFIX
 
 

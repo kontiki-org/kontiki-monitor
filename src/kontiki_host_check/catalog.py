@@ -4,6 +4,7 @@ from boomerang_contracts.alert.catalog import (
     AlertCriterionDescriptor,
     AlertEventTypeCatalog,
 )
+
 from kontiki_host_check.names import HOST_CHECK_SERVICE_NAME
 
 HOST_CATEGORY = "kontiki.host"

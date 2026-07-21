@@ -4,6 +4,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from boomerang_contracts.alert.normalized import NormalizedAlert
+
 from kontiki_monitor.catalog import REGISTRY_CATEGORY
 from kontiki_monitor.names import KONTIKI_MONITOR_SERVICE_NAME
 

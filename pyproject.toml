@@ -5,12 +5,24 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry]
 name = "kontiki-monitor"
 version = "0.1.0"
-description = "Kontiki Registry fleet monitor — emits alert.normalized for Boomerang."
-authors = ["Boomerang"]
+description = "Kontiki ops suite: fleet/registry monitor and per-host disk checks."
+authors = ["Julien Weber <jpkwbr@protonmail.com>"]
 readme = "README.md"
+license = "Apache-2.0"
+homepage = "https://github.com/kontiki-org/kontiki-monitor"
+repository = "https://github.com/kontiki-org/kontiki-monitor"
 packages = [
     { include = "kontiki_monitor", from = "src" },
     { include = "kontiki_host_check", from = "src" },
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
 ]
 
 [tool.poetry.dependencies]
@@ -23,6 +35,9 @@ boomerang-contracts = ">=0.1.0,<0.2.0"
 [tool.poetry.group.dev.dependencies]
 behave = "^1.2.6"
 pyyaml = "^6.0.0"
+black = "^23.0.0"
+isort = "^5.12.0"
+flake8 = "^7.0.0"
 
 [tool.poetry.scripts]
 kontiki-monitor = "kontiki_monitor.main:run"
