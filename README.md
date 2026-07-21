@@ -45,7 +45,7 @@ cp stack/telegram_notifier_bot_token.yaml.example \
 make stack-up
 ```
 
-**3. Target a chat** — operator config already wired for `demo-app-service` degraded:
+**3. Target a chat** — operator config already wired for registry `degraded` state changes:
 
 ```yaml
 # stack/subscription.yaml (excerpt)
@@ -60,9 +60,6 @@ app:
             event_type: instance_state_changed
             criteria:
               all_of:
-                - key: service_name
-                  operator: eq
-                  value: demo-app-service
                 - key: new_state
                   operator: eq
                   value: degraded

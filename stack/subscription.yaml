@@ -28,9 +28,6 @@ app:
             event_type: instance_state_changed
             criteria:
               all_of:
-                - key: service_name
-                  operator: eq
-                  value: demo-app-service
                 - key: new_state
                   operator: eq
                   value: degraded

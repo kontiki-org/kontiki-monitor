@@ -40,7 +40,12 @@ def build_alert_subscription_catalog(category=HOST_CATEGORY):
                         event_type="disk_space_high",
                         label="Disk occupation high",
                         criteria=[_HOST, _PATH, _SEVERITY],
-                    )
+                    ),
+                    AlertEventTypeCatalog(
+                        event_type="disk_path_unavailable",
+                        label="Disk path unavailable",
+                        criteria=[_HOST, _PATH],
+                    ),
                 ],
             )
         ],

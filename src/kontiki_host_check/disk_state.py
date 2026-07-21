@@ -1,4 +1,4 @@
-"""Disk occupation judgment from mount usage snapshots."""
+"""Disk occupation and path-availability judgment from mount snapshots."""
 
 import shutil
 from datetime import datetime, timedelta, timezone
@@ -7,6 +7,7 @@ from boomerang_contracts.alert.normalized import NormalizedAlert
 from kontiki_host_check.names import HOST_CHECK_SERVICE_NAME
 
 DISK_SPACE_HIGH = "disk_space_high"
+DISK_PATH_UNAVAILABLE = "disk_path_unavailable"
 
 SEVERITY_WARNING = "warning"
 SEVERITY_CRITICAL = "critical"
@@ -33,10 +34,20 @@ def used_percent_for_path(path):
     return int((usage.used * 100) / usage.total)
 
 
+def _os_error_message(exc):
+    strerror = exc.strerror
+    if strerror:
+        return str(strerror).strip()
+    return str(exc).strip()
+
+
 def collect_disk_state(paths, hostname):
     mounts = {}
     for path in paths:
-        mounts[path] = {"used_percent": used_percent_for_path(path)}
+        try:
+            mounts[path] = {"used_percent": used_percent_for_path(path)}
+        except OSError as exc:
+            mounts[path] = {"error": _os_error_message(exc)}
     return {"hostname": hostname, "mounts": mounts}
 
 
@@ -46,6 +57,26 @@ def severity_for_usage(used_percent, warning_used_percent, critical_used_percent
     if used_percent >= warning_used_percent:
         return SEVERITY_WARNING
     return None
+
+
+def _mount_error(mount):
+    if not isinstance(mount, dict):
+        return None
+    error = mount.get("error")
+    if error is None:
+        return None
+    text = str(error).strip()
+    if not text:
+        return None
+    return text
+
+
+def _mount_used_percent(mount):
+    if not isinstance(mount, dict):
+        return 0
+    if mount.get("used_percent") is None:
+        return 0
+    return int(mount.get("used_percent"))
 
 
 class DiskStateTracker:
@@ -68,8 +99,10 @@ class DiskStateTracker:
         self._category = category
         self._ttl_hours = ttl_hours
         self._source = source
-        # path -> severity currently open
-        self._open = {}
+        # path -> severity for disk_space_high
+        self._open_high = {}
+        # path -> last error text for disk_path_unavailable
+        self._open_unavailable = {}
 
     def evaluate(self, disk_state):
         if not isinstance(disk_state, dict):
@@ -79,28 +112,37 @@ class DiskStateTracker:
         if not isinstance(mounts, dict):
             mounts = {}
 
-        current = {}
+        current_high = {}
+        current_unavailable = {}
         usage_by_path = {}
+        error_by_path = {}
+
         for path in self._paths:
             mount = mounts.get(path)
-            used_percent = 0
-            if isinstance(mount, dict) and mount.get("used_percent") is not None:
-                used_percent = int(mount.get("used_percent"))
+            error = _mount_error(mount)
+            if error is not None:
+                current_unavailable[path] = error
+                error_by_path[path] = error
+                usage_by_path[path] = 0
+                continue
+            used_percent = _mount_used_percent(mount)
             usage_by_path[path] = used_percent
+            error_by_path[path] = ""
             severity = severity_for_usage(
                 used_percent,
                 self._warning_used_percent,
                 self._critical_used_percent,
             )
             if severity is not None:
-                current[path] = severity
+                current_high[path] = severity
 
         alerts = []
 
-        for path, severity in list(self._open.items()):
-            if path not in current:
+        # High recover first when path leaves high (including -> unavailable).
+        for path in list(self._open_high):
+            if path not in current_high:
                 alerts.append(
-                    self._build_alert(
+                    self._build_high_alert(
                         path=path,
                         hostname=hostname,
                         used_percent=usage_by_path.get(path, 0),
@@ -109,11 +151,25 @@ class DiskStateTracker:
                     )
                 )
 
-        for path, severity in current.items():
-            previous = self._open.get(path)
+        # Unavailable recover when path becomes readable again.
+        for path in list(self._open_unavailable):
+            if path not in current_unavailable:
+                alerts.append(
+                    self._build_unavailable_alert(
+                        path=path,
+                        hostname=hostname,
+                        error="",
+                        severity="low",
+                        resolution="recovered",
+                    )
+                )
+
+        # High open / severity change (only for readable paths).
+        for path, severity in current_high.items():
+            previous = self._open_high.get(path)
             if previous != severity:
                 alerts.append(
-                    self._build_alert(
+                    self._build_high_alert(
                         path=path,
                         hostname=hostname,
                         used_percent=usage_by_path[path],
@@ -122,10 +178,29 @@ class DiskStateTracker:
                     )
                 )
 
-        self._open = current
+        # Unavailable open (no re-publish while still unavailable).
+        for path, error in current_unavailable.items():
+            if path not in self._open_unavailable:
+                alerts.append(
+                    self._build_unavailable_alert(
+                        path=path,
+                        hostname=hostname,
+                        error=error,
+                        severity=SEVERITY_CRITICAL,
+                        resolution="open",
+                    )
+                )
+
+        self._open_high = current_high
+        self._open_unavailable = current_unavailable
         return alerts
 
-    def _build_alert(self, path, hostname, used_percent, severity, resolution):
+    def _expires_at(self, occurred_at):
+        if self._ttl_hours is not None and self._ttl_hours > 0:
+            return occurred_at + timedelta(hours=self._ttl_hours)
+        return None
+
+    def _build_high_alert(self, path, hostname, used_percent, severity, resolution):
         alert_id = "disk:%s:%s" % (self._host, path)
         if resolution == "open":
             title = "%s on %s disk occupation high" % (path, self._host)
@@ -133,10 +208,6 @@ class DiskStateTracker:
             title = "%s on %s disk occupation recovered" % (path, self._host)
 
         occurred_at = datetime.now(timezone.utc)
-        expires_at = None
-        if self._ttl_hours is not None and self._ttl_hours > 0:
-            expires_at = occurred_at + timedelta(hours=self._ttl_hours)
-
         return NormalizedAlert(
             alert_id=alert_id,
             source=self._source,
@@ -157,5 +228,34 @@ class DiskStateTracker:
                 "severity": severity,
                 "resolution": resolution,
             },
-            expires_at=expires_at,
+            expires_at=self._expires_at(occurred_at),
+        )
+
+    def _build_unavailable_alert(self, path, hostname, error, severity, resolution):
+        alert_id = "disk:%s:%s:unavailable" % (self._host, path)
+        if resolution == "open":
+            title = "%s on %s disk path unavailable" % (path, self._host)
+        else:
+            title = "%s on %s disk path recovered" % (path, self._host)
+
+        occurred_at = datetime.now(timezone.utc)
+        return NormalizedAlert(
+            alert_id=alert_id,
+            source=self._source,
+            category=self._category,
+            event_type=DISK_PATH_UNAVAILABLE,
+            severity=severity,
+            occurred_at=occurred_at,
+            title=title,
+            body=title,
+            areas=[],
+            attributes={
+                "host": self._host,
+                "hostname": hostname,
+                "path": path,
+                "error": error,
+                "severity": severity,
+                "resolution": resolution,
+            },
+            expires_at=self._expires_at(occurred_at),
         )

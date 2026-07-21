@@ -4,10 +4,11 @@ Feature: Expose host disk subscription catalog via RPC
   As the host-check-service
   I want to return disk occupation alert criteria metadata over RPC
 
-  V1 publishes a single NormalizedAlert event_type disk_space_high with severity
-  warning or critical. Subscriptions can filter on host (config alias), path, and
-  severity. OS hostname is carried in alert attributes for ops correlation but is
-  not a subscription criterion (may change across rebuilds).
+  V1 publishes NormalizedAlert event types disk_space_high (severity warning or
+  critical) and disk_path_unavailable (severity critical). Subscriptions can filter
+  on host (config alias), path, and severity. OS hostname is carried in alert
+  attributes for ops correlation but is not a subscription criterion (may change
+  across rebuilds).
 
   Scenario: Return subscription catalog for host disk alerts
     Given the host-check-service is running with the following configuration
@@ -79,6 +80,26 @@ Feature: Expose host disk subscription catalog via RPC
                     "operators": ["eq"],
                     "value_kind": "string",
                     "attribute_key": "severity"
+                  }
+                ]
+              },
+              {
+                "event_type": "disk_path_unavailable",
+                "label": "Disk path unavailable",
+                "criteria": [
+                  {
+                    "key": "host",
+                    "label": "Host",
+                    "operators": ["eq", "contains"],
+                    "value_kind": "string",
+                    "attribute_key": "host"
+                  },
+                  {
+                    "key": "path",
+                    "label": "Mount path",
+                    "operators": ["eq", "contains"],
+                    "value_kind": "string",
+                    "attribute_key": "path"
                   }
                 ]
               }

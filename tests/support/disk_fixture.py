@@ -13,6 +13,7 @@ ALPINE_IMAGE = "alpine:3.20"
 HOST_CHECK_IMAGE = "kontiki-monitor:local"
 TMPFS_SIZE = "32m"
 CONTAINER_HOSTNAME = "box-a7f2"
+FIXTURE_MOUNT = "/fixture"
 
 
 _image_ready = False
@@ -97,6 +98,84 @@ def set_mount_used_percent(host_dir, percent):
     return int((usage.used * 100) / usage.total)
 
 
+def container_used_percent(fixture, container_path):
+    name = fixture["container_name"]
+    script = (
+        "import shutil; u=shutil.disk_usage(%r); "
+        "print(0 if u.total<=0 else int((u.used*100)/u.total))"
+    ) % container_path
+    out = subprocess.check_output(
+        ["docker", "exec", name, "python", "-c", script],
+        text=True,
+    ).strip()
+    return int(out)
+
+
+def fill_mount(fixture, container_path, percent):
+    percent = int(percent)
+    unavailable = fixture.get("unavailable_paths") or set()
+    if container_path in unavailable:
+        remount_path_in_container(fixture, container_path)
+    host_dir = fixture["host_by_container"][container_path]
+    # Bind mounts can report slightly lower usage inside the container than on the
+    # host; top up until the container's shutil.disk_usage matches the target.
+    for _ in range(8):
+        set_mount_used_percent(host_dir, percent)
+        actual = container_used_percent(fixture, container_path)
+        if actual >= percent:
+            return actual
+        usage = shutil.disk_usage(host_dir)
+        bump = max(usage.total // 100, 4096)
+        fill_path = os.path.join(host_dir, "fill-bump-%s.bin" % _)
+        subprocess.check_call(["fallocate", "-l", str(bump), fill_path])
+    actual = container_used_percent(fixture, container_path)
+    return actual
+
+
+def _fixture_rel(fixture, host_dir):
+    return os.path.relpath(host_dir, fixture["work_dir"])
+
+
+def remount_path_in_container(fixture, container_path):
+    name = fixture["container_name"]
+    host_dir = fixture["host_by_container"][container_path]
+    os.makedirs(host_dir, exist_ok=True)
+    _mount_tmpfs(host_dir)
+    rel = _fixture_rel(fixture, host_dir)
+    subprocess.check_call(
+        [
+            "docker",
+            "exec",
+            "--privileged",
+            name,
+            "sh",
+            "-c",
+            "umount '%s' 2>/dev/null || true; mkdir -p '%s' && mount --bind '%s/%s' '%s'"
+            % (container_path, container_path, FIXTURE_MOUNT, rel, container_path),
+        ]
+    )
+    unavailable = fixture.setdefault("unavailable_paths", set())
+    unavailable.discard(container_path)
+
+
+def make_path_unavailable(fixture, container_path):
+    name = fixture["container_name"]
+    host_dir = fixture["host_by_container"][container_path]
+    subprocess.call(
+        [
+            "docker",
+            "exec",
+            "--privileged",
+            name,
+            "sh",
+            "-c",
+            "umount '%s' 2>/dev/null || true; rm -rf '%s'" % (container_path, container_path),
+        ]
+    )
+    _unmount_tmpfs(host_dir)
+    fixture.setdefault("unavailable_paths", set()).add(container_path)
+
+
 def start_host_check_disk_container(config):
     ensure_host_check_image()
     paths = list(((config.get("host-check") or {}).get("paths")) or [])
@@ -123,8 +202,11 @@ def start_host_check_disk_container(config):
         CONTAINER_HOSTNAME,
         "--network",
         "host",
+        "--privileged",
         "-v",
         "%s:/config/service.yaml:ro" % config_path,
+        "-v",
+        "%s:%s:rshared" % (work, FIXTURE_MOUNT),
     ]
     for container_path, host_dir in host_by_container.items():
         cmd.extend(["-v", "%s:%s" % (host_dir, container_path)])
@@ -138,6 +220,7 @@ def start_host_check_disk_container(config):
         "config_path": config_path,
         "work_dir": work,
         "host_by_container": host_by_container,
+        "unavailable_paths": set(),
     }
 
 

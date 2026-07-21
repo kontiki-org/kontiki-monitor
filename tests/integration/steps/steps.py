@@ -14,7 +14,7 @@ from tests.integration.utils import (
     start_host_check_for_scenario,
     start_kontiki_monitor_subprocess,
 )
-from tests.support.disk_fixture import set_mount_used_percent
+from tests.support.disk_fixture import fill_mount, make_path_unavailable
 from tests.support.harness import http_request
 
 CATCHER = "alert-normalized-event-catcher"
@@ -29,10 +29,20 @@ def _normalize_actual_for_placeholders(expected, actual):
     if isinstance(expected, dict) and isinstance(actual, dict):
         normalized = {}
         for key, expected_value in expected.items():
-            if key in actual:
-                normalized[key] = _normalize_actual_for_placeholders(
-                    expected_value, actual[key]
-                )
+            if key not in actual:
+                continue
+            if (
+                key == "used_percent"
+                and isinstance(expected_value, int)
+                and isinstance(actual[key], int)
+                and actual[key] >= expected_value
+            ):
+                # Container fill may land slightly above the requested percent.
+                normalized[key] = expected_value
+                continue
+            normalized[key] = _normalize_actual_for_placeholders(
+                expected_value, actual[key]
+            )
         return normalized
 
     if isinstance(expected, list) and isinstance(actual, list):
@@ -132,17 +142,28 @@ def step_host_check_running_with_configuration(context):
 def step_disk_poll_observes_mounts_filled(context):
     fixture = context.host_check_disk_fixture
     assert fixture, "host-check disk fixture container is not running"
-    host_by_container = fixture["host_by_container"]
     for row in context.table:
         container_path = row["path"]
         percent = row["percent"]
-        host_dir = host_by_container.get(container_path)
-        assert host_dir, "No host bind for mount %s" % container_path
-        actual = set_mount_used_percent(host_dir, percent)
-        assert actual == int(
+        actual = fill_mount(fixture, container_path, percent)
+        assert actual >= int(
             percent
-        ), "Mount %s filled to %s%%, expected %s%%" % (container_path, actual, percent)
+        ), "Mount %s filled to %s%%, expected >= %s%%" % (
+            container_path,
+            actual,
+            percent,
+        )
     context.manager.clean_events(CATCHER)
+    time.sleep(DISK_TEST_POLL_INTERVAL_SECONDS + 5)
+
+
+@when('a disk usage poll observes path "{path}" as unavailable with error')
+def step_disk_poll_observes_path_unavailable(context, path):
+    _ = context.text
+    fixture = context.host_check_disk_fixture
+    assert fixture, "host-check disk fixture container is not running"
+    make_path_unavailable(fixture, path)
+    # Keep prior events (e.g. disk_space_high open) for transition Then steps.
     time.sleep(DISK_TEST_POLL_INTERVAL_SECONDS + 5)
 
 
