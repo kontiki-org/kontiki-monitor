@@ -42,3 +42,7 @@ stack/telegram_notifier_bot_token.yaml
 # SQLite / local DBs outside ignored data/ (safety net)
 *.sqlite3
 *.db
+
+# Local / working docs (not published)
+docs/SPEC_*.md
+docs/DEPLOYMENT_EMBEDDED.md

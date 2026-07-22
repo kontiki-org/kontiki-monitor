@@ -1,14 +1,6 @@
 # Changelog
 
-## Unreleased
-
-- Requires Kontiki `>=1.4.0` (registration `group`).
-- Stack / service configs: each ops service sets `kontiki.registration.group:
-  platform` in its own YAML (Kontiki merge does not override conflicting leaves).
-  `demo-app` omits it → default `business`.
-- Dev dependency `kontiki-tui>=0.2.0`; `make tui` for optional stack observation.
-
-## [0.1.0] - 2026-07-21
+## [0.1.0] - 2026-07-22
 
 Initial public release.
 
@@ -16,5 +8,9 @@ Initial public release.
   `alert.normalized` (silences via RPC/HTTP).
 - `host-check-service`: per-host disk occupation (warning/critical) and
   unavailable paths → `alert.normalized`.
+- Requires Kontiki `>=1.4.0` (registration `group`). Ops stack services set
+  `kontiki.registration.group: platform` in their own YAML; `demo-app` keeps
+  the default `business` (kontiki-tui defaults to the business view).
 - Embedded Compose stack (Registry, Boomerang notifiers, demo-app, MailHog).
+- Dev dependency `kontiki-tui>=0.2.0`; `make tui` for optional stack observation.
 - Behave integration suites for monitor and host-check.

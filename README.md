@@ -10,7 +10,7 @@
 > Full ops demo → [Quickstart](#quickstart--demo-app--telegram) below.
 
 
-Kontiki-montitor is a small, practical ops suite for Kontiki platforms — complete enough to run, simple enough to own.
+Kontiki-monitor is a small, practical ops suite for Kontiki platforms — complete enough to run, simple enough to own.
 
 - **One complete ops loop** — Build on Kontiki, observe with kontiki-tui, get alerted through Boomerang. No patchwork of tools to glue together.
 - **Alerts that matter from day one** — Fleet gaps, bad service state, full disks: signals your team can act on immediately.
@@ -42,7 +42,8 @@ the **business** registration group (so you mainly see `demo-app`). Each ops ser
 `kontiki.registration.group: platform` in its own config; set `services.group_filter: all`
 in `~/.config/kontiki_tui.yaml` to list them too. Launch with `make tui` after `stack-up`.
 
-**1. Telegram bot token** (optional but needed for Telegram):
+**1. Telegram bot token** (optional but needed for Telegram) — see
+[NB — Telegram bot token and chat id](#nb--telegram-bot-token-and-chat-id):
 
 ```bash
 cp stack/telegram_notifier_bot_token.yaml.example \
@@ -145,3 +146,45 @@ poetry install
 make run-amqp
 make integration-test
 ```
+
+---
+
+## NB — Telegram bot token and chat id
+
+Needed only if you want Telegram in the quickstart (email via MailHog works without it).
+
+**Bot token**
+
+1. Open Telegram and talk to [@BotFather](https://t.me/BotFather).
+2. Send `/newbot` and follow the prompts (display name + username ending in `bot`).
+3. BotFather replies with a token like `123456:ABC-DEF...`.
+4. Put it in `stack/telegram_notifier_bot_token.yaml` (from the `.example` file):
+
+```yaml
+app:
+  telegram:
+    bot_token: "YOUR_BOT_TOKEN"
+```
+
+Keep that file local (it is gitignored).
+
+**Chat id** (where alerts are sent)
+
+1. Start a chat with your new bot (press Start), or add it to a group.
+2. Send any message in that chat.
+3. Open in a browser (replace with your token):
+
+   `https://api.telegram.org/bot<YOUR_BOT_TOKEN>/getUpdates`
+
+4. In the JSON, find `"chat":{"id": ...}` — that number is your `chat_id`
+   (for groups it is often negative).
+5. Set it in `stack/telegram_notifier.yaml`:
+
+```yaml
+app:
+  endpoints:
+    ops_alerts:
+      chat_id: "YOUR_CHAT_ID"
+```
+
+Use a string in YAML even though the value is numeric.

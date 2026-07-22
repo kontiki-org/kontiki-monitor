@@ -18,4 +18,4 @@ app:
   # Flat endpoint registry (endpoint_id → channel fields).
   endpoints:
     ops_alerts:
-      chat_id: "442226941"
+      chat_id: "YOUR_CHAT_ID"
