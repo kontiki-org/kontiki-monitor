@@ -2,7 +2,7 @@
 	install fmt lint check \
 	run-amqp down-amqp \
 	integration-test integration-test-tag \
-	stack-up stack-down \
+	stack-up stack-down tui \
 	demo-app-degrade demo-app-recover demo-app-status
 
 PY ?= poetry run python
@@ -45,6 +45,12 @@ stack-up:
 
 stack-down:
 	docker compose down
+
+# Optional: observe the stack with kontiki-tui (needs stack-up).
+# Services default to business group (demo-app). Stack service logs are under ./data
+# (registry under ./logs) — set logs.directory in ~/.config/kontiki_tui.yaml if needed.
+tui:
+	poetry run kontiki-tui
 
 # Host-side RPC against demo-app-service (AMQP on localhost:5672). Needs stack-up
 # (or a prior build of $(BOOMERANG_IMAGE)).

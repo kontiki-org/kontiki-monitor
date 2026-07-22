@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- Requires Kontiki `>=1.4.0` (registration `group`).
+- Stack / service configs: each ops service sets `kontiki.registration.group:
+  platform` in its own YAML (Kontiki merge does not override conflicting leaves).
+  `demo-app` omits it → default `business`.
+- Dev dependency `kontiki-tui>=0.2.0`; `make tui` for optional stack observation.
+
 ## [0.1.0] - 2026-07-21
 
 Initial public release.

@@ -3,6 +3,10 @@ logging:
     file:
       filename: /data/host_check_service.log
 
+kontiki:
+  registration:
+    group: platform
+
 host-check:
   # Stable alias for subscriptions / alert_id (not necessarily OS hostname).
   host: "local"

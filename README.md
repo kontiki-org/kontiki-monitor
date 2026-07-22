@@ -1,35 +1,46 @@
 # kontiki-monitor
 
-A small, practical ops suite for Kontiki platforms — complete enough to run, simple enough to own.
+> **Part of the Kontiki suite** — a compact open-source stack for startups and
+> small teams that need ops without the heavy stack.
+>
+> - Build with [Kontiki](https://github.com/kontiki-org/kontiki)
+> - See with [kontiki-tui](https://github.com/kontiki-org/kontiki-tui)
+> - Get alerted with [kontiki-monitor](https://github.com/kontiki-org/kontiki-monitor)
+>
+> Full ops demo → [Quickstart](#quickstart--demo-app--telegram) below.
+
+
+Kontiki-montitor is a small, practical ops suite for Kontiki platforms — complete enough to run, simple enough to own.
 
 - **One complete ops loop** — Build on Kontiki, observe with kontiki-tui, get alerted through Boomerang. No patchwork of tools to glue together.
 - **Alerts that matter from day one** — Fleet gaps, bad service state, full disks: signals your team can act on immediately.
 - **Platform-native, low overhead** — Built on the Registry and the bus you already run. Same `alert.normalized` contract, fewer moving parts, production-ready without an observability army.
 
-This repository ships two Kontiki services that plug into Boomerang: they judge Registry
-fleet state, registry bus events, and local disk occupation, then publish
-`alert.normalized` for subscriptions and notifiers.
+[Boomerang](https://github.com/kontiki-org/boomerang) is the Kontiki alerting engine:
+YAML subscriptions match normalized alerts and route them to notifiers (email, Telegram, …).
+This repository ships two Kontiki services that plug into it: they judge Registry fleet
+state, registry bus events, and local disk occupation, then publish `alert.normalized`
+for those subscriptions and notifiers.
 
 | Service | CLI | Config | Role |
 |---|---|---|---|
 | `kontiki-monitor` | `kontiki-monitor` | `kontiki-monitor:` in `config/default.yaml` (+ `config/embedded.yaml`) | Fleet expectations and Registry bus events → alerts |
 | `host-check-service` | `host-check-service` | `host-check:` in `config/host-check.yaml` | Local disk occupation (warning/critical %, paths); one instance per host |
 
-### Where it shines
-
-This suite fits best when the platform **is** Kontiki (plus maybe a thin UI), the team is
-small, and the same stack must be **deployed and supported many times** — including
-on-premise at customer sites. You get run / see / get-alerted without standing up a
-separate observability plant on every install. Reach for heavier tooling when you need
-cross-stack SLOs, deep performance forensics, or org-wide metrics at scale — not as the
-default for operating Kontiki services day to day.
-
 ---
 
 ## Quickstart — demo-app → Telegram
 
-The embedded stack runs Registry, **kontiki-monitor**, Boomerang (subscription / alert-engine /
-notifiers), a demo app, and MailHog. Degrade the demo app; ops get a Telegram (and email) alert.
+The quickstart runs a **demo Kontiki service** (`demo-app`) as the business workload under
+watch, plus the **ops stack** that watches it: Registry, **kontiki-monitor**, Boomerang
+(subscription / alert-engine / notifiers), and MailHog (local SMTP sink so you can inspect
+email alerts without a real mailbox). Degrade the demo app; ops get a Telegram (and email)
+alert.
+
+With [kontiki-tui](https://github.com/kontiki-org/kontiki-tui), the Services tab defaults to
+the **business** registration group (so you mainly see `demo-app`). Each ops service sets
+`kontiki.registration.group: platform` in its own config; set `services.group_filter: all`
+in `~/.config/kontiki_tui.yaml` to list them too. Launch with `make tui` after `stack-up`.
 
 **1. Telegram bot token** (optional but needed for Telegram):
 
@@ -44,6 +55,18 @@ cp stack/telegram_notifier_bot_token.yaml.example \
 ```bash
 make stack-up
 ```
+
+**Optional — observe with kontiki-tui** (dev dep via `poetry install`):
+
+```bash
+make tui
+```
+
+AMQP defaults to `localhost:5672` (Compose publishes RabbitMQ). The Services tab
+shows **business** services by default (`demo-app`). Stack logs live under `./data`
+(registry under `./logs`); set `logs.directory` in `~/.config/kontiki_tui.yaml` if
+you want the Logs tab pointed at them. Use `services.group_filter: all` to also list
+platform services.
 
 **3. Target a chat** — operator config already wired for registry `degraded` state changes:
 

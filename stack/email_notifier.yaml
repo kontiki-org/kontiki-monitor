@@ -2,6 +2,8 @@ kontiki:
   http:
     address: "0.0.0.0"
     port: 8003
+  registration:
+    group: platform
 
 logging:
   handlers:

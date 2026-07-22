@@ -3,6 +3,10 @@ logging:
     file:
       filename: /data/kontiki_monitor.log
 
+kontiki:
+  registration:
+    group: platform
+
 kontiki-monitor:
   category: "kontiki.registry"
   poll_interval_seconds: 30

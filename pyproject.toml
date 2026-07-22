@@ -27,7 +27,7 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = ">=3.11,<4.0"
-kontiki = ">=1.3.0"
+kontiki = ">=1.4.0"
 pydantic = "^2.0.0"
 aiohttp = ">=3.9.0"
 boomerang-contracts = ">=0.1.0,<0.2.0"
@@ -38,6 +38,7 @@ pyyaml = "^6.0.0"
 black = "^23.0.0"
 isort = "^5.12.0"
 flake8 = "^7.0.0"
+kontiki-tui = ">=0.2.0"
 
 [tool.poetry.scripts]
 kontiki-monitor = "kontiki_monitor.main:run"
