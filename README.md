@@ -3,11 +3,9 @@
 > **Part of the Kontiki suite** — a compact open-source stack for startups and
 > small teams that need ops without the heavy stack.
 >
-> - Build with [Kontiki](https://github.com/kontiki-org/kontiki)
-> - See with [kontiki-tui](https://github.com/kontiki-org/kontiki-tui)
-> - Get alerted with [kontiki-monitor](https://github.com/kontiki-org/kontiki-monitor)
+> Full suite overview → https://kontiki-org.github.io/
 >
-> Full ops demo → [Quickstart](#quickstart--demo-app--telegram) below.
+> Ops demo → [Quickstart](#quickstart--demo-app--telegram) below.
 
 
 Kontiki-monitor is a small, practical ops suite for Kontiki platforms — complete enough to run, simple enough to own.
