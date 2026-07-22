@@ -122,11 +122,17 @@ make stack-down
 
 ---
 
-## Local install
+## Install
 
 ```bash
-poetry install
+pip install kontiki-monitor
 ```
+
+Entry points: `kontiki-monitor` and `host-check-service` (pass one or more `--config`
+YAML files). The [Quickstart](#quickstart--demo-app--telegram) above uses Docker Compose
+instead of a local pip install.
+
+([package on PyPI](https://pypi.org/project/kontiki-monitor/))
 
 ## Integration tests
 

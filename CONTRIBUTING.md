@@ -21,6 +21,9 @@ make integration-test
 
 `make check` runs `isort` / `black` on `src/`, then `flake8`.
 
+CI on GitHub runs **lint only** (Python 3.11–3.13). Run Behave locally before
+opening a non-trivial PR — suites are too long for the default pipeline.
+
 Tagged suites (examples):
 
 ```bash
