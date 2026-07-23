@@ -14,7 +14,7 @@ app:
   telegram:
     api_base_url: https://api.telegram.org
     # bot_token: provide via stack/telegram_notifier_bot_token.yaml (gitignored).
-    # Optional domain icons (Boomerang >= 0.3.0): exact key, then prefix.
+    # Optional domain icons (Boomerang >= 0.3.1): exact key, then prefix.
     category_icons:
       kontiki.registry: "⚙️"
 

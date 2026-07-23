@@ -1,11 +1,11 @@
 # Changelog
 
-## [Unreleased]
+## [0.2.0] - 2026-07-23
 
 - Demo workload owned here: `testing/demo_app` (`kontiki-demo-app`), Compose
   image `kontiki-monitor:local`, Makefile targets via local CLI
   (`demo-app-raise-exception` included).
-- Ops stack: `kontiki-boomerang` `>=0.3.0,<0.4.0`; Telegram
+- Ops stack: `kontiki-boomerang` `>=0.3.1,<0.4.0`; Telegram
   `app.telegram.category_icons` (`kontiki.registry`) in
   `stack/telegram_notifier.yaml`.
 - Docs: `docs/configuration.md` and
