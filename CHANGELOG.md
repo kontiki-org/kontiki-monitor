@@ -8,6 +8,8 @@
 - Ops stack: `kontiki-boomerang` `>=0.3.0,<0.4.0`; Telegram
   `app.telegram.category_icons` (`kontiki.registry`) in
   `stack/telegram_notifier.yaml`.
+- Docs: `docs/configuration.md` and
+  `docs/kontiki-monitor-config.example.yaml`.
 
 ## [0.1.0] - 2026-07-22
 

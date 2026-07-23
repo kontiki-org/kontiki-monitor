@@ -1,0 +1,43 @@
+# Example application configuration for kontiki-monitor services.
+# Each process loads its own YAML — copy the relevant block into that service's
+# config (Compose may merge several files under config/ and stack/).
+# Framework keys (kontiki.*) are documented in Kontiki's docs/configuration.md.
+# Full reference: docs/configuration.md
+
+# =============================================================================
+# kontiki-monitor
+# =============================================================================
+kontiki:
+  registration:
+    group: platform
+  # http:                    # optional; needed for silence HTTP API
+  #   address: "0.0.0.0"
+  #   port: 8091
+
+kontiki-monitor:
+  category: kontiki.registry
+  poll_interval_seconds: 30
+  # alert_ttl_hours: 24      # omit → no expires_at on alerts
+  expected_services:
+    # service_name → { min_active }  (min_active defaults to 1)
+    my-api-service:
+      min_active: 1
+    # subscription-service:
+    #   min_active: 1
+
+# =============================================================================
+# host-check-service
+# =============================================================================
+# kontiki:
+#   registration:
+#     group: platform
+#
+# host-check:
+#   host: "local"              # stable alias (required)
+#   category: kontiki.host
+#   poll_interval_seconds: 30
+#   warning_used_percent: 90
+#   critical_used_percent: 95
+#   # alert_ttl_hours: 24
+#   paths:                     # required, non-empty
+#     - /

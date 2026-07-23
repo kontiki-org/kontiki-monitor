@@ -127,7 +127,10 @@ pip install kontiki-monitor
 ```
 
 Entry points: `kontiki-monitor` and `host-check-service` (pass one or more `--config`
-YAML files). The [Quickstart](#quickstart--demo-app--telegram) above uses Docker Compose
+YAML files). Configuration reference:
+[docs/configuration.md](docs/configuration.md) and
+[docs/kontiki-monitor-config.example.yaml](docs/kontiki-monitor-config.example.yaml).
+The [Quickstart](#quickstart--demo-app--telegram) above uses Docker Compose
 instead of a local pip install.
 
 ([package on PyPI](https://pypi.org/project/kontiki-monitor/))
