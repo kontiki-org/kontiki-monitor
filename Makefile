@@ -3,14 +3,13 @@
 	run-amqp down-amqp \
 	integration-test integration-test-tag \
 	stack-up stack-down tui \
-	demo-app-degrade demo-app-recover demo-app-status
+	demo-app-degrade demo-app-recover demo-app-status demo-app-raise-exception
 
 PY ?= poetry run python
-SRC = src
+SRC = src testing
 
-BOOMERANG_IMAGE ?= kontiki-monitor-boomerang:local
-DEMO_APP_CLI = docker run --rm --network host $(BOOMERANG_IMAGE) \
-	python -m boomerang.testing.demo_app.cli
+# Package lives under testing/; set PYTHONPATH so -m works even before editable install.
+DEMO_APP_CLI = PYTHONPATH=testing $(PY) -m demo_app.cli
 
 install:
 	poetry install
@@ -52,8 +51,7 @@ stack-down:
 tui:
 	poetry run kontiki-tui
 
-# Host-side RPC against demo-app-service (AMQP on localhost:5672). Needs stack-up
-# (or a prior build of $(BOOMERANG_IMAGE)).
+# Host-side RPC against demo-app-service (AMQP on localhost:5672). Needs stack-up.
 demo-app-degrade:
 	# Heartbeat interval is 5s — wait a few seconds after degrade before checking mail (MailHog :8025).
 	$(DEMO_APP_CLI) degrade
@@ -63,3 +61,7 @@ demo-app-recover:
 
 demo-app-status:
 	$(DEMO_APP_CLI) status
+
+demo-app-raise-exception:
+	# Needs a rebuilt demo-app container (new RPC). Triggers registry.exception.recorded.
+	$(DEMO_APP_CLI) raise-exception

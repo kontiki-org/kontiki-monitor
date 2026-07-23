@@ -35,6 +35,7 @@ logs/
 
 # Local stack secrets
 stack/telegram_notifier_bot_token.yaml
+stack/telegram_notifier.yaml.local
 .env
 .env.*
 !.env.example

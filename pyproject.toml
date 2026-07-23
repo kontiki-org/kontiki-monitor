@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "kontiki-monitor"
-version = "0.1.0"
+version = "0.2.0"
 description = "Kontiki ops suite: fleet/registry monitor and per-host disk checks."
 authors = ["Julien Weber <jpkwbr@protonmail.com>"]
 readme = "README.md"
@@ -14,6 +14,7 @@ repository = "https://github.com/kontiki-org/kontiki-monitor"
 packages = [
     { include = "kontiki_monitor", from = "src" },
     { include = "kontiki_host_check", from = "src" },
+    { include = "demo_app", from = "testing" },
 ]
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -43,6 +44,7 @@ kontiki-tui = ">=0.2.0"
 [tool.poetry.scripts]
 kontiki-monitor = "kontiki_monitor.main:run"
 host-check-service = "kontiki_host_check.main:run"
+kontiki-demo-app = "demo_app.main:run"
 
 [tool.black]
 line-length = 88
@@ -50,4 +52,4 @@ line-length = 88
 [tool.isort]
 profile = "black"
 line_length = 88
-known_first_party = ["kontiki_monitor", "kontiki_host_check"]
+known_first_party = ["kontiki_monitor", "kontiki_host_check", "demo_app"]
