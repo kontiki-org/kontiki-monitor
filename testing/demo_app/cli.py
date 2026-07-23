@@ -44,9 +44,7 @@ async def raise_exception():
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(
-        description="Control demo-app-service over RPC."
-    )
+    parser = argparse.ArgumentParser(description="Control demo-app-service over RPC.")
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("degrade", help="Mark demo-app-service as degraded")
     sub.add_parser("recover", help="Clear demo-app-service degraded flag")
