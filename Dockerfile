@@ -9,6 +9,7 @@ RUN pip install --no-cache-dir -U pip
 
 COPY pyproject.toml README.md ./
 COPY src ./src
+COPY testing ./testing
 COPY config ./config
 
 RUN pip install --no-cache-dir .

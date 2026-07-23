@@ -216,10 +216,13 @@ services:
       start_period: 30s
 
   demo-app-service:
-    <<: *boomerang-image
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: kontiki-monitor:local
     container_name: km-demo-app-service
     command: >
-      boomerang-demo-app
+      kontiki-demo-app
       --config /stack/common.services.yaml
       --config /stack/demo_app.yaml
     depends_on:
