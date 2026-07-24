@@ -163,13 +163,72 @@ Feature: Publish Kontiki Registry events as normalized alerts
         "severity": "severe",
         "occurred_at": "2026-07-15T12:00:00Z",
         "title": "payment-service state active → degraded",
-        "body": "Instance 11111111-2222-3333-4444-555555555555 changed from active to degraded.",
+        "body": "payment-service state active → degraded",
         "areas": [],
         "attributes": {
           "service_name": "payment-service",
           "instance_id": "11111111-2222-3333-4444-555555555555",
           "previous_state": "active",
           "new_state": "degraded"
+        }
+      }
+      """
+
+  Scenario: Include status_changed reason on alert.normalized when present
+    Given the kontiki-monitor is running with the following configuration
+      """
+      kontiki:
+        amqp:
+          url: amqp://guest:guest@localhost/
+      logging:
+        version: 1
+        disable_existing_loggers: false
+        formatters:
+          default:
+            format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+            datefmt: "%Y-%m-%d %H:%M:%S"
+        handlers:
+          file:
+            class: logging.FileHandler
+            formatter: default
+            filename: /tmp/kontiki-monitor.log
+            level: INFO
+        root:
+          level: DEBUG
+          handlers:
+            - file
+      kontiki-monitor:
+        category: "kontiki.registry"
+        poll_interval_seconds: 30
+      """
+    When a "registry.instance.status_changed" event is published with payload
+      """
+      {
+        "service_name": "payment-service",
+        "instance_id": "11111111-2222-3333-4444-555555555555",
+        "previous_status": "active",
+        "new_status": "degraded",
+        "reason": "demo degrade requested",
+        "timestamp": "2026-07-15T12:00:00Z"
+      }
+      """
+    Then an "alert.normalized" event is published with payload
+      """
+      {
+        "source": "kontiki-monitor",
+        "category": "kontiki.registry",
+        "event_type": "instance_state_changed",
+        "severity": "severe",
+        "occurred_at": "2026-07-15T12:00:00Z",
+        "title": "payment-service state active → degraded",
+        "body": "payment-service state active → degraded",
+        "areas": [],
+        "attributes": {
+          "service_name": "payment-service",
+          "instance_id": "11111111-2222-3333-4444-555555555555",
+          "previous_state": "active",
+          "new_state": "degraded",
+          "reason": "demo degrade requested"
         }
       }
       """

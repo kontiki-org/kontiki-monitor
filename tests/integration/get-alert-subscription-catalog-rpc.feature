@@ -113,6 +113,13 @@ Feature: Expose Kontiki Registry subscription catalog via RPC
                     "operators": ["eq"],
                     "value_kind": "string",
                     "attribute_key": "new_state"
+                  },
+                  {
+                    "key": "reason",
+                    "label": "Reason",
+                    "operators": ["eq", "contains"],
+                    "value_kind": "string",
+                    "attribute_key": "reason"
                   }
                 ]
               },

@@ -345,7 +345,7 @@ Feature: Silence alerts for a service on demand
         "severity": "severe",
         "occurred_at": "2026-07-15T12:01:00Z",
         "title": "email-notifier-service state active → degraded",
-        "body": "Instance aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee changed from active to degraded.",
+        "body": "email-notifier-service state active → degraded",
         "areas": [],
         "attributes": {
           "service_name": "email-notifier-service",
@@ -401,7 +401,7 @@ Feature: Silence alerts for a service on demand
         "severity": "severe",
         "occurred_at": "2026-07-15T12:02:00Z",
         "title": "payment-service state active → degraded",
-        "body": "Instance 11111111-2222-3333-4444-555555555555 changed from active to degraded.",
+        "body": "payment-service state active → degraded",
         "areas": [],
         "attributes": {
           "service_name": "payment-service",

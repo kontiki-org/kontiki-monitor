@@ -158,14 +158,18 @@ def registry_event_to_normalized_alert(
         new_state = _text(payload.get("new_status"))
         if not previous_state or not new_state:
             return None
+        reason = _text(payload.get("reason"))
         attributes = {
             "service_name": service_name,
             "instance_id": instance_id,
             "previous_state": previous_state,
             "new_state": new_state,
         }
+        if reason:
+            attributes["reason"] = reason
         title = f"{service_name} state {previous_state} → {new_state}"
-        body = f"Instance {instance_id} changed from {previous_state} to {new_state}."
+        # All facts live in attributes (incl. optional reason); body == title
+        # so Telegram does not repeat them under Message:.
         return _build_alert(
             category=category,
             event_type=INSTANCE_STATE_CHANGED,
@@ -176,7 +180,7 @@ def registry_event_to_normalized_alert(
             severity=_severity_for_state_change(previous_state, new_state),
             occurred_at=occurred_at,
             title=title,
-            body=body,
+            body=title,
             attributes=attributes,
             ttl_hours=ttl_hours,
         )

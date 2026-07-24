@@ -39,6 +39,12 @@ _NEW_STATE = AlertCriterionDescriptor(
     operators=["eq"],
     value_kind="string",
 )
+_REASON = AlertCriterionDescriptor(
+    key="reason",
+    label="Reason",
+    operators=["eq", "contains"],
+    value_kind="string",
+)
 _EXCEPTION_TYPE = AlertCriterionDescriptor(
     key="exception_type",
     label="Exception type",
@@ -70,7 +76,7 @@ def build_alert_subscription_catalog(
                     AlertEventTypeCatalog(
                         event_type="instance_state_changed",
                         label="Instance state changed",
-                        criteria=[_SERVICE_NAME, _PREVIOUS_STATE, _NEW_STATE],
+                        criteria=[_SERVICE_NAME, _PREVIOUS_STATE, _NEW_STATE, _REASON],
                     ),
                     AlertEventTypeCatalog(
                         event_type="exception_recorded",
