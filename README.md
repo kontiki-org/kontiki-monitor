@@ -5,7 +5,7 @@
 >
 > Full suite overview → https://kontiki-org.github.io/
 >
-> Ops demo → [Quickstart](#quickstart--demo-app--telegram) below.
+> Try it locally → [Sandbox](#sandbox--demo-app--telegram) below.
 
 
 Kontiki-monitor is a small, practical ops suite for Kontiki platforms — complete enough to run, simple enough to own.
@@ -24,15 +24,59 @@ occupation, then publish `alert.normalized` for those subscriptions and notifier
 
 ---
 
-## Quickstart — demo-app → Telegram
+## Install
 
-The quickstart runs
-  - a **demo Kontiki service** (`demo-app`) as the business workload under watch
-  - the **ops stack** that watches it: Registry, **kontiki-monitor**, Boomerang
-(subscription / alert-engine / notifiers), and MailHog (local SMTP sink so you can inspect
-email alerts without a real mailbox). Degrade the demo app; ops get a Telegram (and email)
-alert.
+**kontiki-monitor** publishes `alert.normalized` and relies on
+[Boomerang](https://github.com/kontiki-org/boomerang) for subscriptions and
+delivery (email / Telegram). Together with a Kontiki Registry and an AMQP
+broker, that is the ops path — same pattern as any other Kontiki service
+(systemd, Kubernetes, …).
 
+```bash
+pip install kontiki-monitor kontiki-boomerang
+```
+
+- **kontiki-monitor** ([PyPI](https://pypi.org/project/kontiki-monitor/)) —
+  `kontiki-monitor`, `host-check-service`
+- **kontiki-boomerang** ([PyPI](https://pypi.org/project/kontiki-boomerang/)) —
+  `boomerang-subscription`, `boomerang-alert-engine`,
+  `boomerang-email-notifier`, `boomerang-telegram-notifier`, …
+
+`kontiki-monitor` only pulls `boomerang-contracts` for alert shapes; install
+Boomerang explicitly as above. Pass one or more `--config` YAML files to each
+process (Kontiki merges them). Monitor / host-check keys:
+[docs/configuration.md](docs/configuration.md) and
+[docs/kontiki-monitor-config.example.yaml](docs/kontiki-monitor-config.example.yaml).
+Boomerang config: its own
+[docs/configuration.md](https://github.com/kontiki-org/boomerang/blob/main/docs/configuration.md).
+
+Minimal sketch (same pattern on systemd, Kubernetes, …):
+
+```bash
+kontiki-monitor --config /path/to/common.yaml --config /path/to/monitor.yaml
+host-check-service --config /path/to/common.yaml --config /path/to/host-check.yaml
+boomerang-subscription --config /path/to/common.yaml --config /path/to/subscription.yaml
+boomerang-alert-engine --config /path/to/common.yaml --config /path/to/alert_engine.yaml
+boomerang-email-notifier --config /path/to/common.yaml --config /path/to/email.yaml
+boomerang-telegram-notifier --config /path/to/common.yaml --config /path/to/telegram.yaml
+```
+
+To try everything without wiring your own platform, use the
+[sandbox](#sandbox--demo-app--telegram) below (Compose installs Boomerang in the
+images for you).
+
+---
+
+## Sandbox — demo-app → Telegram
+
+Local **trial stack** via Docker Compose (not a production installer). It runs:
+
+- a **demo Kontiki service** (`demo-app`) as the business workload under watch
+- the **ops stack** that watches it: Registry, **kontiki-monitor**, Boomerang
+  (subscription / alert-engine / notifiers), and MailHog (local SMTP sink so you
+  can inspect email alerts without a real mailbox)
+
+Degrade the demo app; ops get a Telegram (and email) alert.
 
 **1. Telegram bot token** (optional but needed for Telegram) — see
 [NB — Telegram bot token and chat id](#nb--telegram-bot-token-and-chat-id):
@@ -43,7 +87,7 @@ cp stack/telegram_notifier_bot_token.yaml.example \
 # set app.telegram.bot_token from BotFather
 ```
 
-**2. Start the stack:**
+**2. Start the sandbox:**
 
 ```bash
 make stack-up
@@ -120,21 +164,6 @@ make stack-down
 
 ---
 
-## Install
-
-```bash
-pip install kontiki-monitor
-```
-
-Entry points: `kontiki-monitor` and `host-check-service` (pass one or more `--config`
-YAML files). Configuration reference:
-[docs/configuration.md](docs/configuration.md) and
-[docs/kontiki-monitor-config.example.yaml](docs/kontiki-monitor-config.example.yaml).
-The [Quickstart](#quickstart--demo-app--telegram) above uses Docker Compose
-instead of a local pip install.
-
-([package on PyPI](https://pypi.org/project/kontiki-monitor/))
-
 ## Integration tests
 
 ```bash
@@ -146,7 +175,7 @@ make integration-test
 
 ## NB — Telegram bot token and chat id
 
-Needed only if you want Telegram in the quickstart (email via MailHog works without it).
+Needed only if you want Telegram in the sandbox (email via MailHog works without it).
 
 **Bot token**
 
