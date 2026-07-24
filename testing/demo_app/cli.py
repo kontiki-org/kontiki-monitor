@@ -6,6 +6,7 @@ import sys
 
 from kontiki.messaging import Messenger, RpcProxy, RpcServerError
 
+from demo_app.delegate import DEFAULT_DEGRADED_REASON
 from demo_app.service import DEMO_APP_SERVICE_NAME
 
 DEFAULT_AMQP_URL = "amqp://guest:guest@localhost/"
@@ -16,13 +17,15 @@ class DemoAppRpcProxy(RpcProxy):
         super().__init__(messenger, service_name=DEMO_APP_SERVICE_NAME)
 
 
-async def set_degraded(degraded):
+async def set_degraded(degraded, reason=None):
     async with Messenger(
         amqp_url=DEFAULT_AMQP_URL,
         standalone=True,
         client_name="demo-app-cli",
     ) as messenger:
-        return await DemoAppRpcProxy(messenger).set_degraded(degraded=degraded)
+        return await DemoAppRpcProxy(messenger).set_degraded(
+            degraded=degraded, reason=reason
+        )
 
 
 async def get_degraded():
@@ -46,7 +49,12 @@ async def raise_exception():
 def main(argv=None):
     parser = argparse.ArgumentParser(description="Control demo-app-service over RPC.")
     sub = parser.add_subparsers(dest="command", required=True)
-    sub.add_parser("degrade", help="Mark demo-app-service as degraded")
+    degrade = sub.add_parser("degrade", help="Mark demo-app-service as degraded")
+    degrade.add_argument(
+        "--reason",
+        default=DEFAULT_DEGRADED_REASON,
+        help="Reason carried on registry.instance.status_changed (Kontiki >= 1.5.0)",
+    )
     sub.add_parser("recover", help="Clear demo-app-service degraded flag")
     sub.add_parser("status", help="Print current degraded flag")
     sub.add_parser(
@@ -59,7 +67,7 @@ def main(argv=None):
         if args.command == "status":
             result = asyncio.run(get_degraded())
         elif args.command == "degrade":
-            result = asyncio.run(set_degraded(True))
+            result = asyncio.run(set_degraded(True, reason=args.reason))
         elif args.command == "raise-exception":
             result = asyncio.run(raise_exception())
         else:

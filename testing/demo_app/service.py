@@ -14,8 +14,8 @@ class DemoAppService:
     messenger = Messenger()
 
     @rpc
-    async def set_degraded(self, degraded=True):
-        return self.delegate.set_degraded(degraded)
+    async def set_degraded(self, degraded=True, reason=None):
+        return self.delegate.set_degraded(degraded, reason=reason)
 
     @rpc
     async def get_degraded(self):
@@ -23,6 +23,7 @@ class DemoAppService:
 
     @degraded_on
     def is_degraded(self):
+        # Kontiki >= 1.5.0: (True, reason) → status_changed.reason for alerting.
         return self.delegate.is_degraded()
 
     @rpc

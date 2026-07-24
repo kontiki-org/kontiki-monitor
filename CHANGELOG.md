@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.3.0] - 2026-07-24
+
+- Requires Kontiki `>=1.5.0`. Demo-app `@degraded_on` returns `(True, reason)`;
+  CLI `degrade --reason` (default: `demo degrade requested`).
+- `kontiki-monitor` maps `registry.instance.status_changed.reason` into
+  `attributes.reason` (catalog criterion on `instance_state_changed`); alert
+  `body` matches `title` so notifiers do not repeat the same facts under Message.
+- Ops stack: `kontiki-boomerang` `>=0.4.0,<0.5.0` (structured HTML email aligned
+  with Telegram).
+- Stack logging format includes `%(flow_id)s` (Kontiki >= 1.5.0) in
+  `stack/common.services.yaml` and `stack/common.docker.yaml`.
+
 ## [0.2.0] - 2026-07-23
 
 - Demo workload owned here: `testing/demo_app` (`kontiki-demo-app`), Compose
