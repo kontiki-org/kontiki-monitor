@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [0.3.0] - 2026-07-24
 
 - Requires Kontiki `>=1.5.0`. Demo-app `@degraded_on` returns `(True, reason)`;
   CLI `degrade --reason` (default: `demo degrade requested`).

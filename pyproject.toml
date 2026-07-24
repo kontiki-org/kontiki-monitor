@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "kontiki-monitor"
-version = "0.2.0"
+version = "0.3.0"
 description = "Kontiki ops suite: fleet/registry monitor and per-host disk checks."
 authors = ["Julien Weber <jpkwbr@protonmail.com>"]
 readme = "README.md"
