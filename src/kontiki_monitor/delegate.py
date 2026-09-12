@@ -107,9 +107,7 @@ class KontikiMonitorDelegate(ServiceDelegate):
         return alert
 
     def observe_exception_recorded(self, payload):
-        return self._exception_tracker.observe(
-            payload, silenced=self._silences.names()
-        )
+        return self._exception_tracker.observe(payload, silenced=self._silences.names())
 
     def sweep_exception_fingerprints(self):
         return self._exception_tracker.sweep()
