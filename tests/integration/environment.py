@@ -46,7 +46,7 @@ def before_all(context):
 
 
 def before_scenario(context, scenario):
-    _ = scenario
+    context.amqp_disconnected = "amqp_disconnected" in scenario.effective_tags
     context.last_rpc_result = None
     context.last_rpc_error = None
     context.last_http_status = None

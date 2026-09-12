@@ -47,19 +47,24 @@ Feature: Detect fleet expectation failures as normalized alerts
     Then an "alert.normalized" event is published with payload
       """
       {
+        "schema_version": "1.0",
+        "alert_id": "fleet:alpha-service:missing",
         "source": "kontiki-monitor",
         "category": "kontiki.registry",
         "event_type": "expected_service_missing",
         "severity": "critical",
-        "alert_id": "fleet:alpha-service:missing",
+        "occurred_at": "*",
         "title": "alpha-service missing from registry",
+        "body": "alpha-service missing from registry",
+        "areas": [],
         "attributes": {
           "service_name": "alpha-service",
           "min_active": 1,
           "active_count": 0,
           "observed_statuses": "",
           "resolution": "open"
-        }
+        },
+        "expires_at": null
       }
       """
     When a fleet poll observes the Service Registry returning the following services
@@ -76,19 +81,24 @@ Feature: Detect fleet expectation failures as normalized alerts
     Then an "alert.normalized" event is published with payload
       """
       {
+        "schema_version": "1.0",
+        "alert_id": "fleet:alpha-service:missing",
         "source": "kontiki-monitor",
         "category": "kontiki.registry",
         "event_type": "expected_service_missing",
         "severity": "critical",
-        "alert_id": "fleet:alpha-service:missing",
+        "occurred_at": "*",
         "title": "alpha-service missing from registry",
+        "body": "alpha-service missing from registry",
+        "areas": [],
         "attributes": {
           "service_name": "alpha-service",
           "min_active": 1,
           "active_count": 0,
           "observed_statuses": "",
           "resolution": "open"
-        }
+        },
+        "expires_at": null
       }
       """
     When a fleet poll observes the Service Registry returning the following services
@@ -112,19 +122,24 @@ Feature: Detect fleet expectation failures as normalized alerts
     Then an "alert.normalized" event is published with payload
       """
       {
+        "schema_version": "1.0",
+        "alert_id": "fleet:alpha-service:missing",
         "source": "kontiki-monitor",
         "category": "kontiki.registry",
         "event_type": "expected_service_missing",
         "severity": "low",
-        "alert_id": "fleet:alpha-service:missing",
+        "occurred_at": "*",
         "title": "alpha-service recovered",
+        "body": "alpha-service recovered",
+        "areas": [],
         "attributes": {
           "service_name": "alpha-service",
           "min_active": 1,
           "active_count": 1,
           "observed_statuses": "inst-1=active",
           "resolution": "recovered"
-        }
+        },
+        "expires_at": null
       }
       """
 
@@ -150,19 +165,24 @@ Feature: Detect fleet expectation failures as normalized alerts
     Then an "alert.normalized" event is published with payload
       """
       {
+        "schema_version": "1.0",
+        "alert_id": "fleet:alpha-service:insufficient",
         "source": "kontiki-monitor",
         "category": "kontiki.registry",
         "event_type": "insufficient_active_instances",
         "severity": "severe",
-        "alert_id": "fleet:alpha-service:insufficient",
+        "occurred_at": "*",
         "title": "alpha-service insufficient active instances",
+        "body": "alpha-service insufficient active instances",
+        "areas": [],
         "attributes": {
           "service_name": "alpha-service",
           "min_active": 1,
           "active_count": 0,
           "observed_statuses": "inst-1=down",
           "resolution": "open"
-        }
+        },
+        "expires_at": null
       }
       """
 
@@ -188,19 +208,24 @@ Feature: Detect fleet expectation failures as normalized alerts
     Then an "alert.normalized" event is published with payload
       """
       {
+        "schema_version": "1.0",
+        "alert_id": "fleet:alpha-service:insufficient",
         "source": "kontiki-monitor",
         "category": "kontiki.registry",
         "event_type": "insufficient_active_instances",
         "severity": "severe",
-        "alert_id": "fleet:alpha-service:insufficient",
+        "occurred_at": "*",
         "title": "alpha-service insufficient active instances",
+        "body": "alpha-service insufficient active instances",
+        "areas": [],
         "attributes": {
           "service_name": "alpha-service",
           "min_active": 1,
           "active_count": 0,
           "observed_statuses": "inst-1=down",
           "resolution": "open"
-        }
+        },
+        "expires_at": null
       }
       """
     When a fleet poll observes the Service Registry returning the following services
@@ -224,19 +249,24 @@ Feature: Detect fleet expectation failures as normalized alerts
     Then an "alert.normalized" event is published with payload
       """
       {
+        "schema_version": "1.0",
+        "alert_id": "fleet:alpha-service:insufficient",
         "source": "kontiki-monitor",
         "category": "kontiki.registry",
         "event_type": "insufficient_active_instances",
         "severity": "low",
-        "alert_id": "fleet:alpha-service:insufficient",
+        "occurred_at": "*",
         "title": "alpha-service recovered",
+        "body": "alpha-service recovered",
+        "areas": [],
         "attributes": {
           "service_name": "alpha-service",
           "min_active": 1,
           "active_count": 1,
           "observed_statuses": "inst-1=active",
           "resolution": "recovered"
-        }
+        },
+        "expires_at": null
       }
       """
 
@@ -248,19 +278,24 @@ Feature: Detect fleet expectation failures as normalized alerts
     Then an "alert.normalized" event is published with payload
       """
       {
+        "schema_version": "1.0",
+        "alert_id": "fleet:alpha-service:missing",
         "source": "kontiki-monitor",
         "category": "kontiki.registry",
         "event_type": "expected_service_missing",
         "severity": "critical",
-        "alert_id": "fleet:alpha-service:missing",
+        "occurred_at": "*",
         "title": "alpha-service missing from registry",
+        "body": "alpha-service missing from registry",
+        "areas": [],
         "attributes": {
           "service_name": "alpha-service",
           "min_active": 1,
           "active_count": 0,
           "observed_statuses": "",
           "resolution": "open"
-        }
+        },
+        "expires_at": null
       }
       """
     And no "alert.normalized" event is published with event_type "insufficient_active_instances"
@@ -287,19 +322,24 @@ Feature: Detect fleet expectation failures as normalized alerts
     Then an "alert.normalized" event is published with payload
       """
       {
+        "schema_version": "1.0",
+        "alert_id": "fleet:alpha-service:missing",
         "source": "kontiki-monitor",
         "category": "kontiki.registry",
         "event_type": "expected_service_missing",
         "severity": "critical",
-        "alert_id": "fleet:alpha-service:missing",
+        "occurred_at": "*",
         "title": "alpha-service missing from registry",
+        "body": "alpha-service missing from registry",
+        "areas": [],
         "attributes": {
           "service_name": "alpha-service",
           "min_active": 1,
           "active_count": 0,
           "observed_statuses": "",
           "resolution": "open"
-        }
+        },
+        "expires_at": null
       }
       """
     And no "alert.normalized" event is published for service_name "beta-service"

@@ -9,6 +9,9 @@ from pydantic import BaseModel
 # Must match poll_interval_seconds in @fleet_state / @alert_silences / @disk configs.
 FLEET_TEST_POLL_INTERVAL_SECONDS = 8
 DISK_TEST_POLL_INTERVAL_SECONDS = 8
+# Must match exception-fingerprint-normalized-alerts.feature Background.
+EXCEPTION_FINGERPRINT_POLL_INTERVAL_SECONDS = 2
+EXCEPTION_RECOVER_AFTER_SECONDS = 3
 
 from tests.integration.utils import (
     start_host_check_for_scenario,
@@ -26,6 +29,8 @@ SILENCE_RPC_METHODS = ("add_silence", "clear_silence")
 
 
 def _normalize_actual_for_placeholders(expected, actual):
+    if expected == "*":
+        return "*"
     if isinstance(expected, dict) and isinstance(actual, dict):
         normalized = {}
         for key, expected_value in expected.items():
@@ -93,7 +98,9 @@ def _call_sut_rpc(context, method_name, payload):
 def step_service_running_with_configuration(context):
     config_text = context.text.strip()
     config = yaml.safe_load(config_text) or {}
-    proc, config_path = start_kontiki_monitor_subprocess(config)
+    proc, config_path = start_kontiki_monitor_subprocess(
+        config, amqp_disconnected=bool(getattr(context, "amqp_disconnected", False))
+    )
     context.kontiki_monitor_process = proc
     context.kontiki_monitor_config_path = config_path
     time.sleep(5)
@@ -167,6 +174,15 @@ def step_disk_poll_observes_path_unavailable(context, path):
     time.sleep(DISK_TEST_POLL_INTERVAL_SECONDS + 5)
 
 
+@when("the Messenger is disconnected")
+def step_messenger_is_disconnected(context):
+    # Tag @amqp_disconnected already patched Messenger.publish in the SUT process.
+    assert getattr(context, "amqp_disconnected", False), (
+        "Scenario must be tagged @amqp_disconnected so the harness disconnects "
+        "Messenger.publish"
+    )
+
+
 @when('a "{event_type}" event is published with payload')
 def step_publish_registry_event_with_payload(context, event_type):
     payload = json.loads(context.text.strip()) if context.text else {}
@@ -186,6 +202,16 @@ def step_fleet_poll_observes_registry_services(context):
     context.manager.get_service(REGISTRY_MOCK).set_services(services)
     context.manager.clean_events(CATCHER)
     time.sleep(FLEET_TEST_POLL_INTERVAL_SECONDS + 5)
+
+
+@when("an exception fingerprint poll runs after the recover window")
+def step_exception_fingerprint_poll_after_recover_window(context):
+    context.manager.clean_events(CATCHER)
+    time.sleep(
+        EXCEPTION_RECOVER_AFTER_SECONDS
+        + EXCEPTION_FINGERPRINT_POLL_INTERVAL_SECONDS
+        + 5
+    )
 
 
 @then('an "{event_type}" event is published with payload')

@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.4.0] - 2026-09-12
+
+- Requires Kontiki `>=1.12.0`. Skip `alert.normalized` publish when Messenger
+  raises `AmqpDisconnectedError` (warning only; no Registry exception feedback
+  loop on stack restart). Same guard on registry handlers, fleet poll, and
+  host-check disk poll.
+- Fingerprint `registry.exception.recorded` into open/recover `exception_recorded`
+  edges (`alert_id` `exception:{service}:{hash}`, `attributes.resolution`).
+  Config: `exception_recover_after_seconds` (default 300).
+
 ## [0.3.0] - 2026-07-24
 
 - Requires Kontiki `>=1.5.0`. Demo-app `@degraded_on` returns `(True, reason)`;

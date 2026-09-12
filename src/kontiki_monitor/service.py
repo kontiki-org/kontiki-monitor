@@ -2,7 +2,7 @@ import logging
 
 from aiohttp import web
 from boomerang_contracts.alert.normalized import ALERT_NORMALIZED_EVENT
-from kontiki.messaging import Messenger, on_event, rpc, rpc_error
+from kontiki.messaging import AmqpDisconnectedError, Messenger, on_event, rpc, rpc_error
 from kontiki.task.task import task
 from kontiki.web.web import http
 
@@ -90,7 +90,14 @@ class KontikiMonitorService:
 
     @on_event(REGISTRY_EVENT_EXCEPTION_RECORDED)
     async def on_exception_recorded(self, payload):
-        await self._publish_normalized_alert(REGISTRY_EVENT_EXCEPTION_RECORDED, payload)
+        alerts = self.delegate.observe_exception_recorded(payload)
+        for alert in alerts:
+            logging.info(
+                "Publishing exception alert.normalized alert_id=%s resolution=%s",
+                alert.alert_id,
+                alert.attributes.get("resolution"),
+            )
+            await self._publish_alert_normalized(alert)
 
     @task(interval=FLEET_POLL_INTERVAL_CONFIG_KEY, immediate=False)
     async def poll_fleet_state(self):
@@ -103,7 +110,17 @@ class KontikiMonitorService:
                 alert.alert_id,
                 alert.attributes.get("resolution"),
             )
-            await self.messenger.publish(ALERT_NORMALIZED_EVENT, alert)
+            await self._publish_alert_normalized(alert)
+
+    @task(interval=FLEET_POLL_INTERVAL_CONFIG_KEY, immediate=False)
+    async def poll_exception_fingerprints(self):
+        alerts = self.delegate.sweep_exception_fingerprints()
+        for alert in alerts:
+            logging.info(
+                "Publishing exception recover alert.normalized alert_id=%s",
+                alert.alert_id,
+            )
+            await self._publish_alert_normalized(alert)
 
     async def _publish_normalized_alert(self, registry_event_type, payload):
         alert = self.delegate.build_normalized_alert(registry_event_type, payload)
@@ -114,4 +131,15 @@ class KontikiMonitorService:
             registry_event_type,
             alert.alert_id,
         )
-        await self.messenger.publish(ALERT_NORMALIZED_EVENT, alert)
+        await self._publish_alert_normalized(alert)
+
+    async def _publish_alert_normalized(self, alert):
+        try:
+            await self.messenger.publish(ALERT_NORMALIZED_EVENT, alert)
+        except AmqpDisconnectedError:
+            logging.warning(
+                "Skipping alert.normalized publish while Messenger is disconnected "
+                "alert_id=%s event_type=%s",
+                alert.alert_id,
+                alert.event_type,
+            )

@@ -27,24 +27,35 @@ def write_temp_config(config):
     return config_path
 
 
-def start_kontiki_subprocess(service_entrypoint, config):
+def start_kontiki_subprocess(service_entrypoint, config, amqp_disconnected=False):
     config_path = write_temp_config(config)
     root = repo_root()
     env = os.environ.copy()
-    path_parts = [str(root / "src")]
+    path_parts = [str(root / "src"), str(root)]
     existing = env.get("PYTHONPATH", "")
     if existing:
         path_parts.append(existing)
     env["PYTHONPATH"] = os.pathsep.join(path_parts)
-    proc = subprocess.Popen(
-        [
+    if amqp_disconnected:
+        command = [
+            sys.executable,
+            "-m",
+            "tests.support.run_service_amqp_disconnected",
+            service_entrypoint,
+            "--config",
+            config_path,
+        ]
+    else:
+        command = [
             sys.executable,
             "-m",
             "kontiki.runner.__main__",
             service_entrypoint,
             "--config",
             config_path,
-        ],
+        ]
+    proc = subprocess.Popen(
+        command,
         cwd=str(root),
         env=env,
         stdout=subprocess.DEVNULL,

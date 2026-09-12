@@ -58,12 +58,16 @@ Feature: Detect high disk occupation as normalized alerts
     Then an "alert.normalized" event is published with payload
       """
       {
+        "schema_version": "1.0",
+        "alert_id": "disk:edge-1:/mnt/root",
         "source": "host-check-service",
         "category": "kontiki.host",
         "event_type": "disk_space_high",
         "severity": "warning",
-        "alert_id": "disk:edge-1:/mnt/root",
+        "occurred_at": "*",
         "title": "/mnt/root on edge-1 disk occupation high",
+        "body": "/mnt/root on edge-1 disk occupation high",
+        "areas": [],
         "attributes": {
           "host": "edge-1",
           "hostname": "box-a7f2",
@@ -73,7 +77,8 @@ Feature: Detect high disk occupation as normalized alerts
           "critical_used_percent": 95,
           "severity": "warning",
           "resolution": "open"
-        }
+        },
+        "expires_at": null
       }
       """
 
@@ -85,12 +90,16 @@ Feature: Detect high disk occupation as normalized alerts
     Then an "alert.normalized" event is published with payload
       """
       {
+        "schema_version": "1.0",
+        "alert_id": "disk:edge-1:/mnt/root",
         "source": "host-check-service",
         "category": "kontiki.host",
         "event_type": "disk_space_high",
         "severity": "warning",
-        "alert_id": "disk:edge-1:/mnt/root",
+        "occurred_at": "*",
         "title": "/mnt/root on edge-1 disk occupation high",
+        "body": "/mnt/root on edge-1 disk occupation high",
+        "areas": [],
         "attributes": {
           "host": "edge-1",
           "hostname": "box-a7f2",
@@ -100,7 +109,8 @@ Feature: Detect high disk occupation as normalized alerts
           "critical_used_percent": 95,
           "severity": "warning",
           "resolution": "open"
-        }
+        },
+        "expires_at": null
       }
       """
     When a disk usage poll observes the mounts filled as follows
@@ -117,12 +127,16 @@ Feature: Detect high disk occupation as normalized alerts
     Then an "alert.normalized" event is published with payload
       """
       {
+        "schema_version": "1.0",
+        "alert_id": "disk:edge-1:/mnt/root",
         "source": "host-check-service",
         "category": "kontiki.host",
         "event_type": "disk_space_high",
         "severity": "warning",
-        "alert_id": "disk:edge-1:/mnt/root",
+        "occurred_at": "*",
         "title": "/mnt/root on edge-1 disk occupation high",
+        "body": "/mnt/root on edge-1 disk occupation high",
+        "areas": [],
         "attributes": {
           "host": "edge-1",
           "hostname": "box-a7f2",
@@ -132,7 +146,8 @@ Feature: Detect high disk occupation as normalized alerts
           "critical_used_percent": 95,
           "severity": "warning",
           "resolution": "open"
-        }
+        },
+        "expires_at": null
       }
       """
     When a disk usage poll observes the mounts filled as follows
@@ -142,12 +157,16 @@ Feature: Detect high disk occupation as normalized alerts
     Then an "alert.normalized" event is published with payload
       """
       {
+        "schema_version": "1.0",
+        "alert_id": "disk:edge-1:/mnt/root",
         "source": "host-check-service",
         "category": "kontiki.host",
         "event_type": "disk_space_high",
         "severity": "critical",
-        "alert_id": "disk:edge-1:/mnt/root",
+        "occurred_at": "*",
         "title": "/mnt/root on edge-1 disk occupation high",
+        "body": "/mnt/root on edge-1 disk occupation high",
+        "areas": [],
         "attributes": {
           "host": "edge-1",
           "hostname": "box-a7f2",
@@ -157,7 +176,8 @@ Feature: Detect high disk occupation as normalized alerts
           "critical_used_percent": 95,
           "severity": "critical",
           "resolution": "open"
-        }
+        },
+        "expires_at": null
       }
       """
 
@@ -169,12 +189,16 @@ Feature: Detect high disk occupation as normalized alerts
     Then an "alert.normalized" event is published with payload
       """
       {
+        "schema_version": "1.0",
+        "alert_id": "disk:edge-1:/mnt/root",
         "source": "host-check-service",
         "category": "kontiki.host",
         "event_type": "disk_space_high",
         "severity": "critical",
-        "alert_id": "disk:edge-1:/mnt/root",
+        "occurred_at": "*",
         "title": "/mnt/root on edge-1 disk occupation high",
+        "body": "/mnt/root on edge-1 disk occupation high",
+        "areas": [],
         "attributes": {
           "host": "edge-1",
           "hostname": "box-a7f2",
@@ -184,7 +208,8 @@ Feature: Detect high disk occupation as normalized alerts
           "critical_used_percent": 95,
           "severity": "critical",
           "resolution": "open"
-        }
+        },
+        "expires_at": null
       }
       """
     When a disk usage poll observes the mounts filled as follows
@@ -201,12 +226,16 @@ Feature: Detect high disk occupation as normalized alerts
     Then an "alert.normalized" event is published with payload
       """
       {
+        "schema_version": "1.0",
+        "alert_id": "disk:edge-1:/mnt/root",
         "source": "host-check-service",
         "category": "kontiki.host",
         "event_type": "disk_space_high",
         "severity": "critical",
-        "alert_id": "disk:edge-1:/mnt/root",
+        "occurred_at": "*",
         "title": "/mnt/root on edge-1 disk occupation high",
+        "body": "/mnt/root on edge-1 disk occupation high",
+        "areas": [],
         "attributes": {
           "host": "edge-1",
           "hostname": "box-a7f2",
@@ -216,7 +245,8 @@ Feature: Detect high disk occupation as normalized alerts
           "critical_used_percent": 95,
           "severity": "critical",
           "resolution": "open"
-        }
+        },
+        "expires_at": null
       }
       """
     When a disk usage poll observes the mounts filled as follows
@@ -226,12 +256,16 @@ Feature: Detect high disk occupation as normalized alerts
     Then an "alert.normalized" event is published with payload
       """
       {
+        "schema_version": "1.0",
+        "alert_id": "disk:edge-1:/mnt/root",
         "source": "host-check-service",
         "category": "kontiki.host",
         "event_type": "disk_space_high",
         "severity": "warning",
-        "alert_id": "disk:edge-1:/mnt/root",
+        "occurred_at": "*",
         "title": "/mnt/root on edge-1 disk occupation high",
+        "body": "/mnt/root on edge-1 disk occupation high",
+        "areas": [],
         "attributes": {
           "host": "edge-1",
           "hostname": "box-a7f2",
@@ -241,7 +275,8 @@ Feature: Detect high disk occupation as normalized alerts
           "critical_used_percent": 95,
           "severity": "warning",
           "resolution": "open"
-        }
+        },
+        "expires_at": null
       }
       """
 
@@ -253,12 +288,16 @@ Feature: Detect high disk occupation as normalized alerts
     Then an "alert.normalized" event is published with payload
       """
       {
+        "schema_version": "1.0",
+        "alert_id": "disk:edge-1:/mnt/root",
         "source": "host-check-service",
         "category": "kontiki.host",
         "event_type": "disk_space_high",
         "severity": "warning",
-        "alert_id": "disk:edge-1:/mnt/root",
+        "occurred_at": "*",
         "title": "/mnt/root on edge-1 disk occupation high",
+        "body": "/mnt/root on edge-1 disk occupation high",
+        "areas": [],
         "attributes": {
           "host": "edge-1",
           "hostname": "box-a7f2",
@@ -268,7 +307,8 @@ Feature: Detect high disk occupation as normalized alerts
           "critical_used_percent": 95,
           "severity": "warning",
           "resolution": "open"
-        }
+        },
+        "expires_at": null
       }
       """
     When a disk usage poll observes the mounts filled as follows
@@ -278,12 +318,16 @@ Feature: Detect high disk occupation as normalized alerts
     Then an "alert.normalized" event is published with payload
       """
       {
+        "schema_version": "1.0",
+        "alert_id": "disk:edge-1:/mnt/root",
         "source": "host-check-service",
         "category": "kontiki.host",
         "event_type": "disk_space_high",
         "severity": "low",
-        "alert_id": "disk:edge-1:/mnt/root",
+        "occurred_at": "*",
         "title": "/mnt/root on edge-1 disk occupation recovered",
+        "body": "/mnt/root on edge-1 disk occupation recovered",
+        "areas": [],
         "attributes": {
           "host": "edge-1",
           "hostname": "box-a7f2",
@@ -293,7 +337,8 @@ Feature: Detect high disk occupation as normalized alerts
           "critical_used_percent": 95,
           "severity": "low",
           "resolution": "recovered"
-        }
+        },
+        "expires_at": null
       }
       """
 
@@ -312,12 +357,16 @@ Feature: Detect high disk occupation as normalized alerts
     Then an "alert.normalized" event is published with payload
       """
       {
+        "schema_version": "1.0",
+        "alert_id": "disk:edge-1:/mnt/root",
         "source": "host-check-service",
         "category": "kontiki.host",
         "event_type": "disk_space_high",
         "severity": "warning",
-        "alert_id": "disk:edge-1:/mnt/root",
+        "occurred_at": "*",
         "title": "/mnt/root on edge-1 disk occupation high",
+        "body": "/mnt/root on edge-1 disk occupation high",
+        "areas": [],
         "attributes": {
           "host": "edge-1",
           "hostname": "box-a7f2",
@@ -327,7 +376,8 @@ Feature: Detect high disk occupation as normalized alerts
           "critical_used_percent": 95,
           "severity": "warning",
           "resolution": "open"
-        }
+        },
+        "expires_at": null
       }
       """
     And an "alert.normalized" event is published with payload
@@ -360,12 +410,16 @@ Feature: Detect high disk occupation as normalized alerts
     Then an "alert.normalized" event is published with payload
       """
       {
+        "schema_version": "1.0",
+        "alert_id": "disk:edge-1:/mnt/root",
         "source": "host-check-service",
         "category": "kontiki.host",
         "event_type": "disk_space_high",
         "severity": "critical",
-        "alert_id": "disk:edge-1:/mnt/root",
+        "occurred_at": "*",
         "title": "/mnt/root on edge-1 disk occupation high",
+        "body": "/mnt/root on edge-1 disk occupation high",
+        "areas": [],
         "attributes": {
           "host": "edge-1",
           "hostname": "box-a7f2",
@@ -375,6 +429,7 @@ Feature: Detect high disk occupation as normalized alerts
           "critical_used_percent": 95,
           "severity": "critical",
           "resolution": "open"
-        }
+        },
+        "expires_at": null
       }
       """

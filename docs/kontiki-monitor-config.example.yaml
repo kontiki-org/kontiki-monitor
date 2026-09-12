@@ -18,6 +18,7 @@ kontiki-monitor:
   category: kontiki.registry
   poll_interval_seconds: 30
   # alert_ttl_hours: 24      # omit → no expires_at on alerts
+  # exception_recover_after_seconds: 300  # quiet window before exception recover
   expected_services:
     # service_name → { min_active }  (min_active defaults to 1)
     my-api-service:

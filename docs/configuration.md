@@ -24,9 +24,22 @@ Runtime files used by the ops stack live under [`config/`](../config/) and
 | Key | Default | Description |
 |-----|---------|-------------|
 | `kontiki-monitor.category` | `kontiki.registry` | Alert category published on `alert.normalized` (also used in the subscription catalog). |
-| `kontiki-monitor.poll_interval_seconds` | *(required)* | Fleet poll interval in seconds (Kontiki `@task`). Shipped configs use `30`. |
+| `kontiki-monitor.poll_interval_seconds` | *(required)* | Interval in seconds for the fleet poll and the exception-fingerprint recover sweep (Kontiki `@task`). Shipped configs use `30`. |
 | `kontiki-monitor.alert_ttl_hours` | unset | Optional TTL hours written on alert `expires_at`. Omit / null → no expiry. |
 | `kontiki-monitor.expected_services` | unset (`{}`) | Fleet expectations map. Omit / empty → no fleet poll (lifecycle / exception mapping still runs). |
+| `kontiki-monitor.exception_recover_after_seconds` | `300` | After this many seconds without a matching `registry.exception.recorded`, emit `exception_recorded` with `resolution=recovered` for that fingerprint. |
+
+Registry lifecycle events (`instance_registered`, `instance_unregistered`,
+`instance_state_changed`) map one-to-one to `alert.normalized`.
+
+`registry.exception.recorded` uses a fingerprint
+`(service_name, exception_type, message)`: first sight → open
+(`alert_id` `exception:{service}:{short_hash}`, `attributes.resolution=open`);
+repeats while open → no publish; quiet for
+`exception_recover_after_seconds` → recover on the same `alert_id`.
+
+When Messenger `publish` raises Kontiki `AmqpDisconnectedError`, the monitor
+and host-check skip that `alert.normalized` attempt (warning only; no raise).
 
 ### `kontiki-monitor.expected_services`
 
@@ -46,6 +59,7 @@ Example:
 kontiki-monitor:
   category: kontiki.registry
   poll_interval_seconds: 30
+  # exception_recover_after_seconds: 300
   expected_services:
     my-api-service:
       min_active: 1
