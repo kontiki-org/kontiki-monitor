@@ -55,12 +55,16 @@ Feature: Detect unavailable configured disk paths as normalized alerts
     Then an "alert.normalized" event is published with payload
       """
       {
+        "schema_version": "1.0",
+        "alert_id": "disk:edge-1:/mnt/var:unavailable",
         "source": "host-check-service",
         "category": "kontiki.host",
         "event_type": "disk_path_unavailable",
         "severity": "critical",
-        "alert_id": "disk:edge-1:/mnt/var:unavailable",
+        "occurred_at": "*",
         "title": "/mnt/var on edge-1 disk path unavailable",
+        "body": "/mnt/var on edge-1 disk path unavailable",
+        "areas": [],
         "attributes": {
           "host": "edge-1",
           "hostname": "box-a7f2",
@@ -68,7 +72,8 @@ Feature: Detect unavailable configured disk paths as normalized alerts
           "error": "No such file or directory",
           "severity": "critical",
           "resolution": "open"
-        }
+        },
+        "expires_at": null
       }
       """
 
@@ -83,12 +88,16 @@ Feature: Detect unavailable configured disk paths as normalized alerts
     Then an "alert.normalized" event is published with payload
       """
       {
+        "schema_version": "1.0",
+        "alert_id": "disk:edge-1:/mnt/var:unavailable",
         "source": "host-check-service",
         "category": "kontiki.host",
         "event_type": "disk_path_unavailable",
         "severity": "critical",
-        "alert_id": "disk:edge-1:/mnt/var:unavailable",
+        "occurred_at": "*",
         "title": "/mnt/var on edge-1 disk path unavailable",
+        "body": "/mnt/var on edge-1 disk path unavailable",
+        "areas": [],
         "attributes": {
           "host": "edge-1",
           "hostname": "box-a7f2",
@@ -96,7 +105,8 @@ Feature: Detect unavailable configured disk paths as normalized alerts
           "error": "No such file or directory",
           "severity": "critical",
           "resolution": "open"
-        }
+        },
+        "expires_at": null
       }
       """
     When a disk usage poll observes the mounts filled as follows
@@ -119,12 +129,16 @@ Feature: Detect unavailable configured disk paths as normalized alerts
     Then an "alert.normalized" event is published with payload
       """
       {
+        "schema_version": "1.0",
+        "alert_id": "disk:edge-1:/mnt/var:unavailable",
         "source": "host-check-service",
         "category": "kontiki.host",
         "event_type": "disk_path_unavailable",
         "severity": "critical",
-        "alert_id": "disk:edge-1:/mnt/var:unavailable",
+        "occurred_at": "*",
         "title": "/mnt/var on edge-1 disk path unavailable",
+        "body": "/mnt/var on edge-1 disk path unavailable",
+        "areas": [],
         "attributes": {
           "host": "edge-1",
           "hostname": "box-a7f2",
@@ -132,7 +146,8 @@ Feature: Detect unavailable configured disk paths as normalized alerts
           "error": "No such file or directory",
           "severity": "critical",
           "resolution": "open"
-        }
+        },
+        "expires_at": null
       }
       """
     When a disk usage poll observes the mounts filled as follows
@@ -142,12 +157,16 @@ Feature: Detect unavailable configured disk paths as normalized alerts
     Then an "alert.normalized" event is published with payload
       """
       {
+        "schema_version": "1.0",
+        "alert_id": "disk:edge-1:/mnt/var:unavailable",
         "source": "host-check-service",
         "category": "kontiki.host",
         "event_type": "disk_path_unavailable",
         "severity": "low",
-        "alert_id": "disk:edge-1:/mnt/var:unavailable",
+        "occurred_at": "*",
         "title": "/mnt/var on edge-1 disk path recovered",
+        "body": "/mnt/var on edge-1 disk path recovered",
+        "areas": [],
         "attributes": {
           "host": "edge-1",
           "hostname": "box-a7f2",
@@ -155,7 +174,8 @@ Feature: Detect unavailable configured disk paths as normalized alerts
           "error": "",
           "severity": "low",
           "resolution": "recovered"
-        }
+        },
+        "expires_at": null
       }
       """
 
@@ -167,12 +187,16 @@ Feature: Detect unavailable configured disk paths as normalized alerts
     Then an "alert.normalized" event is published with payload
       """
       {
+        "schema_version": "1.0",
+        "alert_id": "disk:edge-1:/mnt/var",
         "source": "host-check-service",
         "category": "kontiki.host",
         "event_type": "disk_space_high",
         "severity": "warning",
-        "alert_id": "disk:edge-1:/mnt/var",
+        "occurred_at": "*",
         "title": "/mnt/var on edge-1 disk occupation high",
+        "body": "/mnt/var on edge-1 disk occupation high",
+        "areas": [],
         "attributes": {
           "host": "edge-1",
           "hostname": "box-a7f2",
@@ -182,7 +206,8 @@ Feature: Detect unavailable configured disk paths as normalized alerts
           "critical_used_percent": 95,
           "severity": "warning",
           "resolution": "open"
-        }
+        },
+        "expires_at": null
       }
       """
     When a disk usage poll observes the mounts filled as follows
@@ -195,12 +220,16 @@ Feature: Detect unavailable configured disk paths as normalized alerts
     Then an "alert.normalized" event is published with payload
       """
       {
+        "schema_version": "1.0",
+        "alert_id": "disk:edge-1:/mnt/var",
         "source": "host-check-service",
         "category": "kontiki.host",
         "event_type": "disk_space_high",
         "severity": "low",
-        "alert_id": "disk:edge-1:/mnt/var",
+        "occurred_at": "*",
         "title": "/mnt/var on edge-1 disk occupation recovered",
+        "body": "/mnt/var on edge-1 disk occupation recovered",
+        "areas": [],
         "attributes": {
           "host": "edge-1",
           "hostname": "box-a7f2",
@@ -210,7 +239,8 @@ Feature: Detect unavailable configured disk paths as normalized alerts
           "critical_used_percent": 95,
           "severity": "low",
           "resolution": "recovered"
-        }
+        },
+        "expires_at": null
       }
       """
     And an "alert.normalized" event is published with payload
@@ -244,12 +274,16 @@ Feature: Detect unavailable configured disk paths as normalized alerts
     Then an "alert.normalized" event is published with payload
       """
       {
+        "schema_version": "1.0",
+        "alert_id": "disk:edge-1:/mnt/var:unavailable",
         "source": "host-check-service",
         "category": "kontiki.host",
         "event_type": "disk_path_unavailable",
         "severity": "critical",
-        "alert_id": "disk:edge-1:/mnt/var:unavailable",
+        "occurred_at": "*",
         "title": "/mnt/var on edge-1 disk path unavailable",
+        "body": "/mnt/var on edge-1 disk path unavailable",
+        "areas": [],
         "attributes": {
           "host": "edge-1",
           "hostname": "box-a7f2",
@@ -257,7 +291,8 @@ Feature: Detect unavailable configured disk paths as normalized alerts
           "error": "No such file or directory",
           "severity": "critical",
           "resolution": "open"
-        }
+        },
+        "expires_at": null
       }
       """
     When a disk usage poll observes the mounts filled as follows
@@ -267,12 +302,16 @@ Feature: Detect unavailable configured disk paths as normalized alerts
     Then an "alert.normalized" event is published with payload
       """
       {
+        "schema_version": "1.0",
+        "alert_id": "disk:edge-1:/mnt/var:unavailable",
         "source": "host-check-service",
         "category": "kontiki.host",
         "event_type": "disk_path_unavailable",
         "severity": "low",
-        "alert_id": "disk:edge-1:/mnt/var:unavailable",
+        "occurred_at": "*",
         "title": "/mnt/var on edge-1 disk path recovered",
+        "body": "/mnt/var on edge-1 disk path recovered",
+        "areas": [],
         "attributes": {
           "host": "edge-1",
           "hostname": "box-a7f2",
@@ -280,7 +319,8 @@ Feature: Detect unavailable configured disk paths as normalized alerts
           "error": "",
           "severity": "low",
           "resolution": "recovered"
-        }
+        },
+        "expires_at": null
       }
       """
     And an "alert.normalized" event is published with payload

@@ -176,7 +176,7 @@ def make_path_unavailable(fixture, container_path):
     fixture.setdefault("unavailable_paths", set()).add(container_path)
 
 
-def start_host_check_disk_container(config):
+def start_host_check_disk_container(config, amqp_disconnected=False):
     ensure_host_check_image()
     paths = list(((config.get("host-check") or {}).get("paths")) or [])
     if not paths:
@@ -210,9 +210,14 @@ def start_host_check_disk_container(config):
     ]
     for container_path, host_dir in host_by_container.items():
         cmd.extend(["-v", "%s:%s" % (host_dir, container_path)])
-    cmd.extend(
-        [HOST_CHECK_IMAGE, "host-check-service", "--config", "/config/service.yaml"]
-    )
+    if amqp_disconnected:
+        from tests.support.amqp_disconnected import HOST_CHECK_DISCONNECTED_BOOTSTRAP
+
+        cmd.extend([HOST_CHECK_IMAGE, "python", "-c", HOST_CHECK_DISCONNECTED_BOOTSTRAP])
+    else:
+        cmd.extend(
+            [HOST_CHECK_IMAGE, "host-check-service", "--config", "/config/service.yaml"]
+        )
     subprocess.check_call(cmd)
 
     return {

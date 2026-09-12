@@ -185,32 +185,4 @@ def registry_event_to_normalized_alert(
             ttl_hours=ttl_hours,
         )
 
-    if event_key == REGISTRY_EVENT_EXCEPTION_RECORDED:
-        exception_type = _text(payload.get("exception_type"))
-        message = _text(payload.get("message"))
-        attributes = {
-            "service_name": service_name,
-            "instance_id": instance_id,
-        }
-        if exception_type:
-            attributes["exception_type"] = exception_type
-        title = f"{service_name} exception recorded"
-        if exception_type:
-            title = f"{service_name} {exception_type}"
-        body = message or title
-        return _build_alert(
-            category=category,
-            event_type=EXCEPTION_RECORDED,
-            alert_id=(
-                f"registry:{service_name}:{instance_id}:exception:"
-                f"{occurred_at.isoformat()}"
-            ),
-            severity="severe",
-            occurred_at=occurred_at,
-            title=title,
-            body=body,
-            attributes=attributes,
-            ttl_hours=ttl_hours,
-        )
-
     return None

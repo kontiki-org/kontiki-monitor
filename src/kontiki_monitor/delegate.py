@@ -6,6 +6,10 @@ from kontiki.registry import ServiceRegistryProxy
 
 from kontiki_monitor.alert_mapping import registry_event_to_normalized_alert
 from kontiki_monitor.catalog import REGISTRY_CATEGORY, build_alert_subscription_catalog
+from kontiki_monitor.exception_fingerprint import (
+    EXCEPTION_RECOVER_AFTER_SECONDS,
+    ExceptionFingerprintTracker,
+)
 from kontiki_monitor.fleet_state import FleetStateTracker, parse_expected_services
 from kontiki_monitor.names import KONTIKI_MONITOR_SERVICE_NAME
 from kontiki_monitor.silences import SilenceStore
@@ -23,6 +27,10 @@ class KontikiMonitorDelegate(ServiceDelegate):
         self._ttl_hours = float(ttl_raw) if ttl_raw is not None else None
         expected_raw = _service_config(config, "expected_services", None)
         self._expected_services = parse_expected_services(expected_raw)
+        recover_raw = _service_config(
+            config, "exception_recover_after_seconds", EXCEPTION_RECOVER_AFTER_SECONDS
+        )
+        self._exception_recover_after_seconds = int(recover_raw)
         self._silences = SilenceStore()
         self._fleet_tracker = None
         if self._expected_services:
@@ -31,12 +39,18 @@ class KontikiMonitorDelegate(ServiceDelegate):
                 category=self._category,
                 ttl_hours=self._ttl_hours,
             )
+        self._exception_tracker = ExceptionFingerprintTracker(
+            category=self._category,
+            recover_after_seconds=self._exception_recover_after_seconds,
+            ttl_hours=self._ttl_hours,
+        )
         logging.info(
             "KontikiMonitorDelegate configured category=%s ttl_hours=%s "
-            "expected_services=%s",
+            "expected_services=%s exception_recover_after_seconds=%s",
             self._category,
             self._ttl_hours,
             sorted(self._expected_services.keys()),
+            self._exception_recover_after_seconds,
         )
 
     def get_alert_subscription_catalog(self):
@@ -46,6 +60,7 @@ class KontikiMonitorDelegate(ServiceDelegate):
         record = self._silences.add(service_name)
         if self._fleet_tracker is not None:
             self._fleet_tracker.drop_open_without_recover(record["service_name"])
+        self._exception_tracker.drop_service_without_recover(record["service_name"])
         logging.info("Silence added for service_name=%s", record["service_name"])
         return record
 
@@ -90,6 +105,12 @@ class KontikiMonitorDelegate(ServiceDelegate):
                 payload,
             )
         return alert
+
+    def observe_exception_recorded(self, payload):
+        return self._exception_tracker.observe(payload, silenced=self._silences.names())
+
+    def sweep_exception_fingerprints(self):
+        return self._exception_tracker.sweep()
 
     async def build_fleet_alerts(self):
         if self._fleet_tracker is None:

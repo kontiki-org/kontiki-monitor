@@ -4,8 +4,9 @@ Feature: Publish Kontiki Registry events as normalized alerts
   As the kontiki-monitor
   I want registry lifecycle events to become alert.normalized events on the bus
 
-  The When steps publish Kontiki 1.1.0 registry bus events (registry.instance.*, registry.exception.recorded).
-  The Then steps assert the connector's NormalizedAlert shape (event_type, attributes for subscriptions).
+  Then payloads are full Boomerang NormalizedAlert objects (all schema fields).
+  exception_recorded open matches exception-fingerprint-normalized-alerts.feature
+  (stable alert_id, attributes.resolution=open).
 
   Scenario: Emit alert.normalized when an instance is registered
     Given the kontiki-monitor is running with the following configuration
@@ -14,22 +15,16 @@ Feature: Publish Kontiki Registry events as normalized alerts
         amqp:
           url: amqp://guest:guest@localhost/
       logging:
-        version: 1
-        disable_existing_loggers: false
-        formatters:
-          default:
-            format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-            datefmt: "%Y-%m-%d %H:%M:%S"
+        directory: /tmp
         handlers:
           file:
-            class: logging.FileHandler
-            formatter: default
-            filename: /tmp/kontiki-monitor.log
+            class: logging.handlers.RotatingFileHandler
             level: INFO
+            maxBytes: 10485760
+            backupCount: 5
         root:
-          level: DEBUG
-          handlers:
-            - file
+          handlers: [file]
+          level: INFO
       kontiki-monitor:
         category: "kontiki.registry"
         poll_interval_seconds: 30
@@ -47,6 +42,8 @@ Feature: Publish Kontiki Registry events as normalized alerts
     Then an "alert.normalized" event is published with payload
       """
       {
+        "schema_version": "1.0",
+        "alert_id": "registry:email-notifier-service:11111111-2222-3333-4444-555555555555:registered:2026-07-15T12:00:00+00:00",
         "source": "kontiki-monitor",
         "category": "kontiki.registry",
         "event_type": "instance_registered",
@@ -60,7 +57,8 @@ Feature: Publish Kontiki Registry events as normalized alerts
           "instance_id": "11111111-2222-3333-4444-555555555555",
           "host": "worker-01",
           "version": "1.0.0"
-        }
+        },
+        "expires_at": null
       }
       """
 
@@ -71,22 +69,16 @@ Feature: Publish Kontiki Registry events as normalized alerts
         amqp:
           url: amqp://guest:guest@localhost/
       logging:
-        version: 1
-        disable_existing_loggers: false
-        formatters:
-          default:
-            format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-            datefmt: "%Y-%m-%d %H:%M:%S"
+        directory: /tmp
         handlers:
           file:
-            class: logging.FileHandler
-            formatter: default
-            filename: /tmp/kontiki-monitor.log
+            class: logging.handlers.RotatingFileHandler
             level: INFO
+            maxBytes: 10485760
+            backupCount: 5
         root:
-          level: DEBUG
-          handlers:
-            - file
+          handlers: [file]
+          level: INFO
       kontiki-monitor:
         category: "kontiki.registry"
         poll_interval_seconds: 30
@@ -102,6 +94,8 @@ Feature: Publish Kontiki Registry events as normalized alerts
     Then an "alert.normalized" event is published with payload
       """
       {
+        "schema_version": "1.0",
+        "alert_id": "registry:email-notifier-service:11111111-2222-3333-4444-555555555555:unregistered:2026-07-15T12:01:00+00:00",
         "source": "kontiki-monitor",
         "category": "kontiki.registry",
         "event_type": "instance_unregistered",
@@ -113,7 +107,8 @@ Feature: Publish Kontiki Registry events as normalized alerts
         "attributes": {
           "service_name": "email-notifier-service",
           "instance_id": "11111111-2222-3333-4444-555555555555"
-        }
+        },
+        "expires_at": null
       }
       """
 
@@ -124,22 +119,16 @@ Feature: Publish Kontiki Registry events as normalized alerts
         amqp:
           url: amqp://guest:guest@localhost/
       logging:
-        version: 1
-        disable_existing_loggers: false
-        formatters:
-          default:
-            format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-            datefmt: "%Y-%m-%d %H:%M:%S"
+        directory: /tmp
         handlers:
           file:
-            class: logging.FileHandler
-            formatter: default
-            filename: /tmp/kontiki-monitor.log
+            class: logging.handlers.RotatingFileHandler
             level: INFO
+            maxBytes: 10485760
+            backupCount: 5
         root:
-          level: DEBUG
-          handlers:
-            - file
+          handlers: [file]
+          level: INFO
       kontiki-monitor:
         category: "kontiki.registry"
         poll_interval_seconds: 30
@@ -157,6 +146,8 @@ Feature: Publish Kontiki Registry events as normalized alerts
     Then an "alert.normalized" event is published with payload
       """
       {
+        "schema_version": "1.0",
+        "alert_id": "registry:payment-service:11111111-2222-3333-4444-555555555555:state:active:degraded:2026-07-15T12:00:00+00:00",
         "source": "kontiki-monitor",
         "category": "kontiki.registry",
         "event_type": "instance_state_changed",
@@ -170,7 +161,8 @@ Feature: Publish Kontiki Registry events as normalized alerts
           "instance_id": "11111111-2222-3333-4444-555555555555",
           "previous_state": "active",
           "new_state": "degraded"
-        }
+        },
+        "expires_at": null
       }
       """
 
@@ -181,22 +173,16 @@ Feature: Publish Kontiki Registry events as normalized alerts
         amqp:
           url: amqp://guest:guest@localhost/
       logging:
-        version: 1
-        disable_existing_loggers: false
-        formatters:
-          default:
-            format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-            datefmt: "%Y-%m-%d %H:%M:%S"
+        directory: /tmp
         handlers:
           file:
-            class: logging.FileHandler
-            formatter: default
-            filename: /tmp/kontiki-monitor.log
+            class: logging.handlers.RotatingFileHandler
             level: INFO
+            maxBytes: 10485760
+            backupCount: 5
         root:
-          level: DEBUG
-          handlers:
-            - file
+          handlers: [file]
+          level: INFO
       kontiki-monitor:
         category: "kontiki.registry"
         poll_interval_seconds: 30
@@ -215,6 +201,8 @@ Feature: Publish Kontiki Registry events as normalized alerts
     Then an "alert.normalized" event is published with payload
       """
       {
+        "schema_version": "1.0",
+        "alert_id": "registry:payment-service:11111111-2222-3333-4444-555555555555:state:active:degraded:2026-07-15T12:00:00+00:00",
         "source": "kontiki-monitor",
         "category": "kontiki.registry",
         "event_type": "instance_state_changed",
@@ -229,7 +217,8 @@ Feature: Publish Kontiki Registry events as normalized alerts
           "previous_state": "active",
           "new_state": "degraded",
           "reason": "demo degrade requested"
-        }
+        },
+        "expires_at": null
       }
       """
 
@@ -240,22 +229,16 @@ Feature: Publish Kontiki Registry events as normalized alerts
         amqp:
           url: amqp://guest:guest@localhost/
       logging:
-        version: 1
-        disable_existing_loggers: false
-        formatters:
-          default:
-            format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-            datefmt: "%Y-%m-%d %H:%M:%S"
+        directory: /tmp
         handlers:
           file:
-            class: logging.FileHandler
-            formatter: default
-            filename: /tmp/kontiki-monitor.log
+            class: logging.handlers.RotatingFileHandler
             level: INFO
+            maxBytes: 10485760
+            backupCount: 5
         root:
-          level: DEBUG
-          handlers:
-            - file
+          handlers: [file]
+          level: INFO
       kontiki-monitor:
         category: "kontiki.registry"
         poll_interval_seconds: 30
@@ -273,6 +256,8 @@ Feature: Publish Kontiki Registry events as normalized alerts
     Then an "alert.normalized" event is published with payload
       """
       {
+        "schema_version": "1.0",
+        "alert_id": "exception:payment-service:f406e9080e69",
         "source": "kontiki-monitor",
         "category": "kontiki.registry",
         "event_type": "exception_recorded",
@@ -284,7 +269,9 @@ Feature: Publish Kontiki Registry events as normalized alerts
         "attributes": {
           "service_name": "payment-service",
           "instance_id": "11111111-2222-3333-4444-555555555555",
-          "exception_type": "RuntimeError"
-        }
+          "exception_type": "RuntimeError",
+          "resolution": "open"
+        },
+        "expires_at": null
       }
       """

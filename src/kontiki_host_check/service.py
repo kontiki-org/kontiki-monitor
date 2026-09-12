@@ -1,7 +1,7 @@
 import logging
 
 from boomerang_contracts.alert.normalized import ALERT_NORMALIZED_EVENT
-from kontiki.messaging import Messenger, rpc
+from kontiki.messaging import AmqpDisconnectedError, Messenger, rpc
 from kontiki.task.task import task
 
 from kontiki_host_check.delegate import HostCheckDelegate
@@ -30,4 +30,15 @@ class HostCheckService:
                 alert.attributes.get("resolution"),
                 alert.severity,
             )
+            await self._publish_alert_normalized(alert)
+
+    async def _publish_alert_normalized(self, alert):
+        try:
             await self.messenger.publish(ALERT_NORMALIZED_EVENT, alert)
+        except AmqpDisconnectedError:
+            logging.warning(
+                "Skipping alert.normalized publish while Messenger is disconnected "
+                "alert_id=%s event_type=%s",
+                alert.alert_id,
+                alert.event_type,
+            )

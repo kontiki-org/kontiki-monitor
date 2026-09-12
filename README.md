@@ -14,12 +14,12 @@ Kontiki-monitor is a small, practical ops suite for Kontiki platforms — comple
 [Boomerang](https://github.com/kontiki-org/boomerang) is the Kontiki alerting engine:
 YAML subscriptions match normalized alerts and route them to notifiers (email, Telegram, …).
 This repository ships two Kontiki services that plug into it: they judge Registry fleet
-state, registry lifecycle events (including recorded exceptions), and local disk
-occupation, then publish `alert.normalized` for those subscriptions and notifiers.
+state, registry lifecycle events, fingerprinted registry exceptions (open/recover), and
+local disk occupation, then publish `alert.normalized` for those subscriptions and notifiers.
 
 | Service | CLI | Config | Role |
 |---|---|---|---|
-| `kontiki-monitor` | `kontiki-monitor` | `kontiki-monitor:` in `config/default.yaml` (+ `config/embedded.yaml`) | Fleet expectations, Registry state changes, and recorded exceptions → alerts |
+| `kontiki-monitor` | `kontiki-monitor` | `kontiki-monitor:` in `config/default.yaml` (+ `config/embedded.yaml`) | Fleet expectations, Registry lifecycle, fingerprinted exceptions → alerts |
 | `host-check-service` | `host-check-service` | `host-check:` in `config/host-check.yaml` | Local disk occupation (warning/critical %, paths); one instance per host |
 
 ---

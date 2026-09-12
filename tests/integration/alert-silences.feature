@@ -225,19 +225,24 @@ Feature: Silence alerts for a service on demand
     Then an "alert.normalized" event is published with payload
       """
       {
+        "schema_version": "1.0",
+        "alert_id": "fleet:alpha-service:missing",
         "source": "kontiki-monitor",
         "category": "kontiki.registry",
         "event_type": "expected_service_missing",
         "severity": "critical",
-        "alert_id": "fleet:alpha-service:missing",
+        "occurred_at": "*",
         "title": "alpha-service missing from registry",
+        "body": "alpha-service missing from registry",
+        "areas": [],
         "attributes": {
           "service_name": "alpha-service",
           "min_active": 1,
           "active_count": 0,
           "observed_statuses": "",
           "resolution": "open"
-        }
+        },
+        "expires_at": null
       }
       """
 
@@ -249,19 +254,24 @@ Feature: Silence alerts for a service on demand
     Then an "alert.normalized" event is published with payload
       """
       {
+        "schema_version": "1.0",
+        "alert_id": "fleet:alpha-service:missing",
         "source": "kontiki-monitor",
         "category": "kontiki.registry",
         "event_type": "expected_service_missing",
         "severity": "critical",
-        "alert_id": "fleet:alpha-service:missing",
+        "occurred_at": "*",
         "title": "alpha-service missing from registry",
+        "body": "alpha-service missing from registry",
+        "areas": [],
         "attributes": {
           "service_name": "alpha-service",
           "min_active": 1,
           "active_count": 0,
           "observed_statuses": "",
           "resolution": "open"
-        }
+        },
+        "expires_at": null
       }
       """
     When I call the RPC add_silence on the kontiki-monitor with the following arguments
@@ -291,19 +301,24 @@ Feature: Silence alerts for a service on demand
     Then an "alert.normalized" event is published with payload
       """
       {
+        "schema_version": "1.0",
+        "alert_id": "fleet:alpha-service:missing",
         "source": "kontiki-monitor",
         "category": "kontiki.registry",
         "event_type": "expected_service_missing",
         "severity": "critical",
-        "alert_id": "fleet:alpha-service:missing",
+        "occurred_at": "*",
         "title": "alpha-service missing from registry",
+        "body": "alpha-service missing from registry",
+        "areas": [],
         "attributes": {
           "service_name": "alpha-service",
           "min_active": 1,
           "active_count": 0,
           "observed_statuses": "",
           "resolution": "open"
-        }
+        },
+        "expires_at": null
       }
       """
 
@@ -339,6 +354,8 @@ Feature: Silence alerts for a service on demand
     Then an "alert.normalized" event is published with payload
       """
       {
+        "schema_version": "1.0",
+        "alert_id": "*",
         "source": "kontiki-monitor",
         "category": "kontiki.registry",
         "event_type": "instance_state_changed",
@@ -352,7 +369,8 @@ Feature: Silence alerts for a service on demand
           "instance_id": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
           "previous_state": "active",
           "new_state": "degraded"
-        }
+        },
+        "expires_at": null
       }
       """
 
@@ -395,6 +413,8 @@ Feature: Silence alerts for a service on demand
     Then an "alert.normalized" event is published with payload
       """
       {
+        "schema_version": "1.0",
+        "alert_id": "*",
         "source": "kontiki-monitor",
         "category": "kontiki.registry",
         "event_type": "instance_state_changed",
@@ -408,6 +428,7 @@ Feature: Silence alerts for a service on demand
           "instance_id": "11111111-2222-3333-4444-555555555555",
           "previous_state": "active",
           "new_state": "degraded"
-        }
+        },
+        "expires_at": null
       }
       """
