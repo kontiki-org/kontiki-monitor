@@ -63,6 +63,9 @@ class HostCheckDelegate(ServiceDelegate):
     def get_alert_subscription_catalog(self):
         return build_alert_subscription_catalog(category=self._category)
 
+    def list_open_alerts(self):
+        return self._tracker.list_open_alerts()
+
     def evaluate_disk_state(self, disk_state):
         return self._tracker.evaluate(disk_state)
 

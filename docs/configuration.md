@@ -28,6 +28,10 @@ Runtime files used by the ops stack live under [`config/`](../config/) and
 | `kontiki-monitor.alert_ttl_hours` | unset | Optional TTL hours written on alert `expires_at`. Omit / null → no expiry. |
 | `kontiki-monitor.expected_services` | unset (`{}`) | Fleet expectations map. Omit / empty → no fleet poll (lifecycle / exception mapping still runs). |
 | `kontiki-monitor.exception_recover_after_seconds` | `300` | After this many seconds without a matching `registry.exception.recorded`, emit `exception_recorded` with `resolution=recovered` for that fingerprint. |
+| `kontiki-monitor.silences_path` | `silences.json` (process cwd) | JSON file for on/off silences (same shape as `list_silences`). Missing → empty set; corrupt → fail fast at setup. |
+
+RPC `list_open_alerts` returns the current open `NormalizedAlert` snapshots
+(fleet + exception fingerprints), sorted by `alert_id`. In-memory only.
 
 Registry lifecycle events (`instance_registered`, `instance_unregistered`,
 `instance_state_changed`) map one-to-one to `alert.normalized`.
@@ -67,7 +71,8 @@ kontiki-monitor:
       min_active: 1
 ```
 
-Silences (RPC / HTTP) are runtime state, not YAML.
+Silences (RPC / HTTP) are runtime state persisted under `silences_path`, not
+declared in YAML.
 
 ---
 
@@ -82,6 +87,9 @@ Silences (RPC / HTTP) are runtime state, not YAML.
 | `host-check.category` | `kontiki.host` | Alert category on `alert.normalized`. |
 | `host-check.poll_interval_seconds` | *(required)* | Disk poll interval in seconds (Kontiki `@task`). Shipped configs use `30`. |
 | `host-check.alert_ttl_hours` | unset | Optional TTL hours on `expires_at`. Omit / null → no expiry. |
+
+RPC `list_open_alerts` returns open disk snapshots for this instance
+(`disk_space_high`, `disk_path_unavailable`), sorted by `alert_id`.
 
 Example:
 

@@ -1,5 +1,7 @@
 import json
+import os
 import subprocess
+import tempfile
 import time
 
 import yaml
@@ -18,7 +20,7 @@ from tests.integration.utils import (
     start_kontiki_monitor_subprocess,
 )
 from tests.support.disk_fixture import fill_mount, make_path_unavailable
-from tests.support.harness import http_request
+from tests.support.harness import http_request, safe_unlink
 
 CATCHER = "alert-normalized-event-catcher"
 SUT_NAME = "kontiki-monitor"
@@ -26,6 +28,70 @@ HOST_CHECK_NAME = "host-check-service"
 PUBLISHER_NAME = "notification-publisher"
 REGISTRY_MOCK = "ServiceRegistry"
 SILENCE_RPC_METHODS = ("add_silence", "clear_silence")
+CURRENT_DIR_TOKEN = "[CURRENT_DIR]"
+
+
+def _scenario_dir(context):
+    if not context.scenario_dir:
+        context.scenario_dir = tempfile.mkdtemp(prefix="km-scenario-")
+    return context.scenario_dir
+
+
+def _expand_current_dir(context, text):
+    return text.replace(CURRENT_DIR_TOKEN, _scenario_dir(context))
+
+
+def _resolve_path(context, path):
+    return _expand_current_dir(context, path)
+
+
+def _load_kontiki_monitor_config(context, text):
+    return yaml.safe_load(_expand_current_dir(context, text.strip())) or {}
+
+
+def _http_base_url(config):
+    http_cfg = (config.get("kontiki") or {}).get("http") or {}
+    port = http_cfg.get("port")
+    if port is None:
+        return None
+    address = http_cfg.get("address") or "127.0.0.1"
+    return "http://%s:%s" % (address, port)
+
+
+def _start_kontiki_monitor(context, config, require_ready=True):
+    safe_unlink(context.kontiki_monitor_config_path)
+    proc, config_path = start_kontiki_monitor_subprocess(
+        config, amqp_disconnected=bool(getattr(context, "amqp_disconnected", False))
+    )
+    context.kontiki_monitor_process = proc
+    context.kontiki_monitor_config_path = config_path
+    context.kontiki_monitor_config = config
+    if not require_ready:
+        return
+    time.sleep(5)
+    if proc.poll() is not None:
+        stderr = (
+            proc.stderr.read().decode(errors="replace") if proc.stderr else ""
+        ) or "(empty)"
+        raise RuntimeError(
+            "kontiki-monitor subprocess exited before step. stderr:\n%s" % stderr
+        )
+    base_url = _http_base_url(config)
+    if base_url is not None:
+        _wait_for_http(base_url)
+
+
+def _stop_kontiki_monitor(context):
+    proc = context.kontiki_monitor_process
+    if proc is None:
+        return
+    proc.terminate()
+    try:
+        proc.wait(timeout=5)
+    except subprocess.TimeoutExpired:
+        proc.kill()
+        proc.wait(timeout=5)
+    context.kontiki_monitor_process = None
 
 
 def _normalize_actual_for_placeholders(expected, actual):
@@ -67,7 +133,20 @@ def _payload_as_dict(payload):
         return payload
     if isinstance(payload, BaseModel):
         return payload.model_dump(mode="json")
+    if isinstance(payload, list):
+        return [_payload_as_dict(item) for item in payload]
     return payload
+
+
+def _assert_payload_matches(expected, actual):
+    if isinstance(expected, list) and isinstance(actual, list):
+        assert len(actual) == len(expected), "Expected %s items, got %s: %s" % (
+            len(expected),
+            len(actual),
+            actual,
+        )
+    normalized = _normalize_actual_for_placeholders(expected, actual)
+    assert normalized == expected, "Expected %s, got %s" % (expected, actual)
 
 
 def _wait_for_http(base_url, timeout_seconds=15):
@@ -96,26 +175,64 @@ def _call_sut_rpc(context, method_name, payload):
 
 @given("the kontiki-monitor is running with the following configuration")
 def step_service_running_with_configuration(context):
-    config_text = context.text.strip()
-    config = yaml.safe_load(config_text) or {}
-    proc, config_path = start_kontiki_monitor_subprocess(
-        config, amqp_disconnected=bool(getattr(context, "amqp_disconnected", False))
-    )
-    context.kontiki_monitor_process = proc
-    context.kontiki_monitor_config_path = config_path
-    time.sleep(5)
-    if proc.poll() is not None:
-        stderr = (
-            proc.stderr.read().decode(errors="replace") if proc.stderr else ""
-        ) or "(empty)"
-        raise RuntimeError(
-            "kontiki-monitor subprocess exited before step. stderr:\n%s" % stderr
-        )
-    http_cfg = (config.get("kontiki") or {}).get("http") or {}
-    port = http_cfg.get("port")
-    address = http_cfg.get("address") or "127.0.0.1"
-    if port is not None:
-        _wait_for_http("http://%s:%s" % (address, port))
+    config = _load_kontiki_monitor_config(context, context.text)
+    _start_kontiki_monitor(context, config, require_ready=True)
+
+
+@when("I start the kontiki-monitor with the following configuration")
+def step_start_kontiki_monitor(context):
+    config = _load_kontiki_monitor_config(context, context.text)
+    _start_kontiki_monitor(context, config, require_ready=False)
+
+
+@when("the kontiki-monitor process restarts")
+def step_kontiki_monitor_restarts(context):
+    config = context.kontiki_monitor_config
+    assert config is not None, "kontiki-monitor was not started in this scenario"
+    _stop_kontiki_monitor(context)
+    _start_kontiki_monitor(context, config, require_ready=True)
+
+
+@then("the kontiki-monitor fails to start")
+def step_kontiki_monitor_fails_to_start(context):
+    proc = context.kontiki_monitor_process
+    assert proc is not None, "kontiki-monitor was not started"
+    deadline = time.time() + 15
+    while time.time() < deadline:
+        if proc.poll() is not None:
+            return
+        time.sleep(0.25)
+    assert False, "kontiki-monitor is still running; expected startup failure"
+
+
+@given('the silences file at "{path}" does not exist')
+def step_silences_file_does_not_exist(context, path):
+    resolved = _resolve_path(context, path)
+    parent = os.path.dirname(resolved)
+    if parent:
+        os.makedirs(parent, exist_ok=True)
+    if os.path.isfile(resolved):
+        os.unlink(resolved)
+
+
+@given('the silences file at "{path}" contains')
+def step_silences_file_contains_given(context, path):
+    resolved = _resolve_path(context, path)
+    parent = os.path.dirname(resolved)
+    if parent:
+        os.makedirs(parent, exist_ok=True)
+    with open(resolved, "w", encoding="utf-8") as handle:
+        handle.write(context.text.strip())
+        handle.write("\n")
+
+
+@then('the silences file at "{path}" contains')
+def step_silences_file_contains_then(context, path):
+    resolved = _resolve_path(context, path)
+    expected = json.loads(context.text.strip()) if context.text else None
+    with open(resolved, encoding="utf-8") as handle:
+        actual = json.load(handle)
+    assert actual == expected, "Expected silences file %s, got %s" % (expected, actual)
 
 
 @given("the host-check-service is running with the following configuration")
@@ -330,14 +447,14 @@ def step_host_check_rpc_succeeds(context):
 def step_rpc_response_is(context):
     expected = json.loads(context.text.strip()) if context.text else {}
     actual = _payload_as_dict(context.last_rpc_result)
-    assert actual == expected, "Expected %s, got %s" % (expected, actual)
+    _assert_payload_matches(expected, actual)
 
 
 @then("the host-check-service RPC response is")
 def step_host_check_rpc_response_is(context):
     expected = json.loads(context.text.strip()) if context.text else {}
     actual = _payload_as_dict(context.last_rpc_result)
-    assert actual == expected, "Expected %s, got %s" % (expected, actual)
+    _assert_payload_matches(expected, actual)
 
 
 @then("the kontiki-monitor RPC response includes the event types")

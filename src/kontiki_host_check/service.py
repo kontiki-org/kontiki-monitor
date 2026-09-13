@@ -18,6 +18,10 @@ class HostCheckService:
     async def get_alert_subscription_catalog(self):
         return self.delegate.get_alert_subscription_catalog()
 
+    @rpc
+    async def list_open_alerts(self):
+        return self.delegate.list_open_alerts()
+
     @task(interval=DISK_POLL_INTERVAL_CONFIG_KEY, immediate=True)
     async def poll_disk_usage(self):
         alerts = self.delegate.build_disk_alerts_from_host()

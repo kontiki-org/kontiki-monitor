@@ -1,10 +1,12 @@
+import os
+import shutil
 import subprocess
 import time
 
 from kontiki.testing import MockServiceManager, MockServiceRunner
 
 from tests.support.disk_fixture import stop_host_check_disk_container
-from tests.support.harness import safe_unlink
+from tests.support.harness import repo_root, safe_unlink
 from tests.support.mocks import (
     AlertNormalizedEventCatcher,
     NotificationPublisherMock,
@@ -27,9 +29,11 @@ def before_all(context):
     time.sleep(1)
     context.kontiki_monitor_process = None
     context.kontiki_monitor_config_path = None
+    context.kontiki_monitor_config = None
     context.host_check_process = None
     context.host_check_config_path = None
     context.host_check_disk_fixture = None
+    context.scenario_dir = None
     context.last_rpc_result = None
     context.last_rpc_error = None
     context.last_http_status = None
@@ -47,10 +51,14 @@ def before_all(context):
 
 def before_scenario(context, scenario):
     context.amqp_disconnected = "amqp_disconnected" in scenario.effective_tags
+    context.kontiki_monitor_config = None
+    context.scenario_dir = None
     context.last_rpc_result = None
     context.last_rpc_error = None
     context.last_http_status = None
     context.last_http_body = None
+    # Default silences_path is cwd/silences.json; clear leftovers between scenarios.
+    safe_unlink(os.path.join(str(repo_root()), "silences.json"))
     context.manager.clean_events("alert-normalized-event-catcher")
     context.manager.get_service("ServiceRegistry").set_services({})
 
@@ -61,6 +69,7 @@ def after_scenario(context, scenario):
     context.kontiki_monitor_process = None
     safe_unlink(context.kontiki_monitor_config_path)
     context.kontiki_monitor_config_path = None
+    context.kontiki_monitor_config = None
 
     _stop_process(context.host_check_process)
     context.host_check_process = None
@@ -69,6 +78,10 @@ def after_scenario(context, scenario):
 
     stop_host_check_disk_container(context.host_check_disk_fixture)
     context.host_check_disk_fixture = None
+
+    if context.scenario_dir:
+        shutil.rmtree(context.scenario_dir, ignore_errors=True)
+        context.scenario_dir = None
 
     context.manager.clean_events("alert-normalized-event-catcher")
 

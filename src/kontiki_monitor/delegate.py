@@ -12,11 +12,21 @@ from kontiki_monitor.exception_fingerprint import (
 )
 from kontiki_monitor.fleet_state import FleetStateTracker, parse_expected_services
 from kontiki_monitor.names import KONTIKI_MONITOR_SERVICE_NAME
-from kontiki_monitor.silences import SilenceStore
+from kontiki_monitor.silences import DEFAULT_SILENCES_PATH, SilenceStore
 
 
 def _service_config(config, key, default=None):
     return get_parameter(config, "%s.%s" % (KONTIKI_MONITOR_SERVICE_NAME, key), default)
+
+
+def _silences_path(config):
+    raw = _service_config(config, "silences_path", DEFAULT_SILENCES_PATH)
+    if raw is None:
+        return DEFAULT_SILENCES_PATH
+    text = str(raw).strip()
+    if not text:
+        return DEFAULT_SILENCES_PATH
+    return text
 
 
 class KontikiMonitorDelegate(ServiceDelegate):
@@ -31,7 +41,8 @@ class KontikiMonitorDelegate(ServiceDelegate):
             config, "exception_recover_after_seconds", EXCEPTION_RECOVER_AFTER_SECONDS
         )
         self._exception_recover_after_seconds = int(recover_raw)
-        self._silences = SilenceStore()
+        self._silences_path = _silences_path(config)
+        self._silences = SilenceStore(self._silences_path)
         self._fleet_tracker = None
         if self._expected_services:
             self._fleet_tracker = FleetStateTracker(
@@ -46,11 +57,13 @@ class KontikiMonitorDelegate(ServiceDelegate):
         )
         logging.info(
             "KontikiMonitorDelegate configured category=%s ttl_hours=%s "
-            "expected_services=%s exception_recover_after_seconds=%s",
+            "expected_services=%s exception_recover_after_seconds=%s "
+            "silences_path=%s",
             self._category,
             self._ttl_hours,
             sorted(self._expected_services.keys()),
             self._exception_recover_after_seconds,
+            self._silences_path,
         )
 
     def get_alert_subscription_catalog(self):
@@ -75,6 +88,13 @@ class KontikiMonitorDelegate(ServiceDelegate):
 
     def list_silences(self):
         return self._silences.list()
+
+    def list_open_alerts(self):
+        alerts = []
+        if self._fleet_tracker is not None:
+            alerts.extend(self._fleet_tracker.list_open_alerts())
+        alerts.extend(self._exception_tracker.list_open_alerts())
+        return sorted(alerts, key=lambda alert: alert.alert_id)
 
     def build_normalized_alert(self, registry_event_type, payload):
         if not isinstance(payload, dict):

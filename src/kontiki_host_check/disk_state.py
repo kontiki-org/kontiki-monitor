@@ -165,36 +165,46 @@ class DiskStateTracker:
                     )
                 )
 
-        # High open / severity change (only for readable paths).
+        next_high = {}
         for path, severity in current_high.items():
             previous = self._open_high.get(path)
-            if previous != severity:
-                alerts.append(
-                    self._build_high_alert(
-                        path=path,
-                        hostname=hostname,
-                        used_percent=usage_by_path[path],
-                        severity=severity,
-                        resolution="open",
-                    )
-                )
+            if previous is not None and previous["severity"] == severity:
+                next_high[path] = previous
+                continue
+            alert = self._build_high_alert(
+                path=path,
+                hostname=hostname,
+                used_percent=usage_by_path[path],
+                severity=severity,
+                resolution="open",
+            )
+            alerts.append(alert)
+            next_high[path] = {"severity": severity, "alert": alert}
 
-        # Unavailable open (no re-publish while still unavailable).
+        next_unavailable = {}
         for path, error in current_unavailable.items():
-            if path not in self._open_unavailable:
-                alerts.append(
-                    self._build_unavailable_alert(
-                        path=path,
-                        hostname=hostname,
-                        error=error,
-                        severity=SEVERITY_CRITICAL,
-                        resolution="open",
-                    )
-                )
+            previous = self._open_unavailable.get(path)
+            if previous is not None:
+                next_unavailable[path] = previous
+                continue
+            alert = self._build_unavailable_alert(
+                path=path,
+                hostname=hostname,
+                error=error,
+                severity=SEVERITY_CRITICAL,
+                resolution="open",
+            )
+            alerts.append(alert)
+            next_unavailable[path] = {"alert": alert}
 
-        self._open_high = current_high
-        self._open_unavailable = current_unavailable
+        self._open_high = next_high
+        self._open_unavailable = next_unavailable
         return alerts
+
+    def list_open_alerts(self):
+        alerts = [entry["alert"] for entry in self._open_high.values()]
+        alerts.extend(entry["alert"] for entry in self._open_unavailable.values())
+        return sorted(alerts, key=lambda alert: alert.alert_id)
 
     def _expires_at(self, occurred_at):
         if self._ttl_hours is not None and self._ttl_hours > 0:

@@ -89,7 +89,8 @@ class FleetStateTracker:
         current = self._compute_open(services, silenced_names)
         alerts = []
 
-        for service_name, kind in list(self._open.items()):
+        for service_name, entry in list(self._open.items()):
+            kind = entry["kind"]
             if current.get(service_name) != kind:
                 alerts.append(
                     self._build_alert(
@@ -100,22 +101,30 @@ class FleetStateTracker:
                     )
                 )
 
+        next_open = {}
         for service_name, kind in current.items():
-            if self._open.get(service_name) != kind:
-                alerts.append(
-                    self._build_alert(
-                        service_name,
-                        kind,
-                        services,
-                        resolution="open",
-                    )
-                )
+            previous = self._open.get(service_name)
+            if previous is not None and previous["kind"] == kind:
+                next_open[service_name] = previous
+                continue
+            alert = self._build_alert(
+                service_name,
+                kind,
+                services,
+                resolution="open",
+            )
+            alerts.append(alert)
+            next_open[service_name] = {"kind": kind, "alert": alert}
 
-        self._open = current
+        self._open = next_open
         return alerts
 
     def drop_open_without_recover(self, service_name):
         self._open.pop(service_name, None)
+
+    def list_open_alerts(self):
+        alerts = [entry["alert"] for entry in self._open.values()]
+        return sorted(alerts, key=lambda alert: alert.alert_id)
 
     def _compute_open(self, services, silenced_names=None):
         silenced_names = set(silenced_names or [])

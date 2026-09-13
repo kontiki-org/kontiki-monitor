@@ -299,14 +299,14 @@ uvloop = ["uvloop (>=0.15.2)"]
 
 [[package]]
 name = "boomerang-contracts"
-version = "0.1.0"
+version = "1.0.0"
 description = "Shared Boomerang alert and notification contracts."
 optional = false
 python-versions = "<4.0,>=3.11"
 groups = ["main"]
 files = [
-    {file = "boomerang_contracts-0.1.0-py3-none-any.whl", hash = "sha256:2da4b98ce0948836f70cdb43bd85ca0ac1006b2d6155d395a95462a973dac391"},
-    {file = "boomerang_contracts-0.1.0.tar.gz", hash = "sha256:f97787f4599c2c840728de172df18f8c2e1a25f98fd6e1a1bf33e07a1d57cdbb"},
+    {file = "boomerang_contracts-1.0.0-py3-none-any.whl", hash = "sha256:0922eaf9ee840751dff06d55014cb4c926e1f06bc270dfc586743da053a73e39"},
+    {file = "boomerang_contracts-1.0.0.tar.gz", hash = "sha256:ad046100ec8dec0f378dc9ef59840d88fcd35806cfda13a93b7c709c3bc04ba2"},
 ]
 
 [package.dependencies]
@@ -1627,4 +1627,4 @@ propcache = ">=0.2.1"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11,<4.0"
-content-hash = "f4ce7e8da8a54f3092cea79cd6a4921e47f910704957752e309d9465fe8214bc"
+content-hash = "3e36bcf42218294ef755bf963d3a4f87cf24de736f592d420cffbb9a62ae70bd"
