@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+- Persist alert silences to JSON (`kontiki-monitor.silences_path`, default
+  `silences.json`). Load at setup; write after every add/clear; missing file is
+  empty; invalid file fails fast.
+
 ## [0.4.0] - 2026-09-12
 
 - Requires Kontiki `>=1.12.0`. Skip `alert.normalized` publish when Messenger

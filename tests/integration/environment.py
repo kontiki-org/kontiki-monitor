@@ -1,3 +1,4 @@
+import shutil
 import subprocess
 import time
 
@@ -27,9 +28,11 @@ def before_all(context):
     time.sleep(1)
     context.kontiki_monitor_process = None
     context.kontiki_monitor_config_path = None
+    context.kontiki_monitor_config = None
     context.host_check_process = None
     context.host_check_config_path = None
     context.host_check_disk_fixture = None
+    context.scenario_dir = None
     context.last_rpc_result = None
     context.last_rpc_error = None
     context.last_http_status = None
@@ -47,6 +50,8 @@ def before_all(context):
 
 def before_scenario(context, scenario):
     context.amqp_disconnected = "amqp_disconnected" in scenario.effective_tags
+    context.kontiki_monitor_config = None
+    context.scenario_dir = None
     context.last_rpc_result = None
     context.last_rpc_error = None
     context.last_http_status = None
@@ -61,6 +66,7 @@ def after_scenario(context, scenario):
     context.kontiki_monitor_process = None
     safe_unlink(context.kontiki_monitor_config_path)
     context.kontiki_monitor_config_path = None
+    context.kontiki_monitor_config = None
 
     _stop_process(context.host_check_process)
     context.host_check_process = None
@@ -69,6 +75,10 @@ def after_scenario(context, scenario):
 
     stop_host_check_disk_container(context.host_check_disk_fixture)
     context.host_check_disk_fixture = None
+
+    if context.scenario_dir:
+        shutil.rmtree(context.scenario_dir, ignore_errors=True)
+        context.scenario_dir = None
 
     context.manager.clean_events("alert-normalized-event-catcher")
 
