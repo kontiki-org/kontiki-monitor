@@ -71,24 +71,28 @@ class ExceptionFingerprintTracker:
         key = _fingerprint_key(service_name, exception_type, message)
 
         alerts = []
-        if key not in self._open:
-            alerts.append(
-                self._build_alert(
-                    service_name=service_name,
-                    instance_id=instance_id,
-                    exception_type=exception_type,
-                    message=message,
-                    occurred_at=occurred_at,
-                    resolution="open",
-                )
+        previous = self._open.get(key)
+        if previous is None:
+            alert = self._build_alert(
+                service_name=service_name,
+                instance_id=instance_id,
+                exception_type=exception_type,
+                message=message,
+                occurred_at=occurred_at,
+                resolution="open",
             )
-        self._open[key] = {
-            "service_name": service_name,
-            "instance_id": instance_id,
-            "exception_type": exception_type,
-            "message": message,
-            "last_seen": now,
-        }
+            alerts.append(alert)
+            self._open[key] = {
+                "service_name": service_name,
+                "instance_id": instance_id,
+                "exception_type": exception_type,
+                "message": message,
+                "last_seen": now,
+                "alert": alert,
+            }
+        else:
+            previous["instance_id"] = instance_id
+            previous["last_seen"] = now
         alerts.extend(self.sweep(now=now, skip_key=key))
         return alerts
 
@@ -119,6 +123,10 @@ class ExceptionFingerprintTracker:
         for key in list(self._open):
             if key[0] == name:
                 del self._open[key]
+
+    def list_open_alerts(self):
+        alerts = [state["alert"] for state in self._open.values()]
+        return sorted(alerts, key=lambda alert: alert.alert_id)
 
     def _drop_silenced(self, silenced_names):
         for key in list(self._open):

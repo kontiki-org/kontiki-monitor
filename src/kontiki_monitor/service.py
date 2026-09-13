@@ -44,6 +44,10 @@ class KontikiMonitorService:
     async def list_silences(self):
         return self.delegate.list_silences()
 
+    @rpc
+    async def list_open_alerts(self):
+        return self.delegate.list_open_alerts()
+
     @http("/silences", "GET")
     async def http_list_silences(self, request):
         _ = request

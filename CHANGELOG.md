@@ -2,9 +2,17 @@
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-09-13
+
+- First stable release.
+- Requires `boomerang-contracts` `>=1.0.0,<2.0.0`. Ops stack image:
+  `kontiki-boomerang` `>=1.0.0,<2.0.0`.
 - Persist alert silences to JSON (`kontiki-monitor.silences_path`, default
   `silences.json`). Load at setup; write after every add/clear; missing file is
   empty; invalid file fails fast.
+- RPC `list_open_alerts` on `kontiki-monitor` and `host-check-service`: returns
+  the in-memory open `NormalizedAlert` snapshots (fleet / exception fingerprints
+  / disk), sorted by `alert_id`. No HTTP; not persisted across restart.
 
 ## [0.4.0] - 2026-09-12
 

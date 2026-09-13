@@ -1,3 +1,4 @@
+import os
 import shutil
 import subprocess
 import time
@@ -5,7 +6,7 @@ import time
 from kontiki.testing import MockServiceManager, MockServiceRunner
 
 from tests.support.disk_fixture import stop_host_check_disk_container
-from tests.support.harness import safe_unlink
+from tests.support.harness import repo_root, safe_unlink
 from tests.support.mocks import (
     AlertNormalizedEventCatcher,
     NotificationPublisherMock,
@@ -56,6 +57,8 @@ def before_scenario(context, scenario):
     context.last_rpc_error = None
     context.last_http_status = None
     context.last_http_body = None
+    # Default silences_path is cwd/silences.json; clear leftovers between scenarios.
+    safe_unlink(os.path.join(str(repo_root()), "silences.json"))
     context.manager.clean_events("alert-normalized-event-catcher")
     context.manager.get_service("ServiceRegistry").set_services({})
 

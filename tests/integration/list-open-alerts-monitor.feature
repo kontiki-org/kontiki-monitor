@@ -239,6 +239,16 @@ Feature: List currently open ops alerts on kontiki-monitor
       """
 
   Scenario: Open exception fingerprint appears in list_open_alerts
+    When a fleet poll observes the Service Registry returning the following services
+      """
+      {
+        "alpha-service": {
+          "inst-1": {
+            "status": "active"
+          }
+        }
+      }
+      """
     When a "registry.exception.recorded" event is published with payload
       """
       {
@@ -302,6 +312,16 @@ Feature: List currently open ops alerts on kontiki-monitor
       """
 
   Scenario: Recovered exception fingerprint is gone from list_open_alerts
+    When a fleet poll observes the Service Registry returning the following services
+      """
+      {
+        "alpha-service": {
+          "inst-1": {
+            "status": "active"
+          }
+        }
+      }
+      """
     When a "registry.exception.recorded" event is published with payload
       """
       {

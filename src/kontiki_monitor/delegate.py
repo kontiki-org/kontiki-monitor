@@ -89,6 +89,13 @@ class KontikiMonitorDelegate(ServiceDelegate):
     def list_silences(self):
         return self._silences.list()
 
+    def list_open_alerts(self):
+        alerts = []
+        if self._fleet_tracker is not None:
+            alerts.extend(self._fleet_tracker.list_open_alerts())
+        alerts.extend(self._exception_tracker.list_open_alerts())
+        return sorted(alerts, key=lambda alert: alert.alert_id)
+
     def build_normalized_alert(self, registry_event_type, payload):
         if not isinstance(payload, dict):
             logging.warning(

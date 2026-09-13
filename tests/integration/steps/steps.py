@@ -133,7 +133,20 @@ def _payload_as_dict(payload):
         return payload
     if isinstance(payload, BaseModel):
         return payload.model_dump(mode="json")
+    if isinstance(payload, list):
+        return [_payload_as_dict(item) for item in payload]
     return payload
+
+
+def _assert_payload_matches(expected, actual):
+    if isinstance(expected, list) and isinstance(actual, list):
+        assert len(actual) == len(expected), "Expected %s items, got %s: %s" % (
+            len(expected),
+            len(actual),
+            actual,
+        )
+    normalized = _normalize_actual_for_placeholders(expected, actual)
+    assert normalized == expected, "Expected %s, got %s" % (expected, actual)
 
 
 def _wait_for_http(base_url, timeout_seconds=15):
@@ -434,14 +447,14 @@ def step_host_check_rpc_succeeds(context):
 def step_rpc_response_is(context):
     expected = json.loads(context.text.strip()) if context.text else {}
     actual = _payload_as_dict(context.last_rpc_result)
-    assert actual == expected, "Expected %s, got %s" % (expected, actual)
+    _assert_payload_matches(expected, actual)
 
 
 @then("the host-check-service RPC response is")
 def step_host_check_rpc_response_is(context):
     expected = json.loads(context.text.strip()) if context.text else {}
     actual = _payload_as_dict(context.last_rpc_result)
-    assert actual == expected, "Expected %s, got %s" % (expected, actual)
+    _assert_payload_matches(expected, actual)
 
 
 @then("the kontiki-monitor RPC response includes the event types")
