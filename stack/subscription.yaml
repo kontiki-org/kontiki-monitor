@@ -5,11 +5,6 @@ kontiki:
   registration:
     group: platform
 
-logging:
-  handlers:
-    file:
-      filename: /data/subscription_service.log
-
 app:
   # Embedded: Registry only (no earthquake demo connector).
   alert_connectors:

@@ -46,8 +46,8 @@ stack-down:
 	docker compose down
 
 # Optional: observe the stack with kontiki-tui (needs stack-up).
-# Services default to business group (demo-app). Stack service logs are under ./data
-# (registry under ./logs) — set logs.directory in ~/.config/kontiki_tui.yaml if needed.
+# Services default to business group (demo-app). All stack service logs are under
+# ./data — set logs.directory in ~/.config/kontiki_tui.yaml if needed.
 tui:
 	poetry run kontiki-tui
 

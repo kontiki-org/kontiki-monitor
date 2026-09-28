@@ -5,11 +5,6 @@ kontiki:
   registration:
     group: platform
 
-logging:
-  handlers:
-    file:
-      filename: /data/telegram_notifier_service.log
-
 app:
   telegram:
     api_base_url: https://api.telegram.org

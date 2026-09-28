@@ -18,7 +18,7 @@ x-boomerang-image: &boomerang-image
 
 services:
   rabbitmq:
-    image: rabbitmq:3.13-management
+    image: rabbitmq:4.3-management
     container_name: km-rabbitmq
     ports:
       - "5672:5672"
@@ -45,7 +45,7 @@ services:
         condition: service_healthy
     volumes:
       - ./stack:/stack:ro
-      - ./logs:/logs
+      - ./data:/data
     restart: unless-stopped
     healthcheck:
       test:

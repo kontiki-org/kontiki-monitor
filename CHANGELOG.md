@@ -1,5 +1,21 @@
 # Changelog
 
+## [2.0.0] - Unreleased
+
+Breaking upgrade to Kontiki 2.0 (JSON-only AMQP, AMQP headers without the
+`kontiki_` prefix, `ActivityTracker`); no change to the monitor's own surface
+(services, RPC, HTTP, alert contracts).
+
+- Requires Kontiki `>=2.0.0,<3.0.0` (JSON-only AMQP, Pydantic models serialized
+  via `model_dump(mode="json")` on the bus, `AmqpDisconnectedError` unchanged for
+  the monitor) and RabbitMQ `>=4.3` (quorum queues). Compose image
+  `rabbitmq:3.13-management` → `4.3-management`.
+- Ops stack logging consolidated under `logging.directory: /data` with a
+  `RotatingFileHandler` (Kontiki file naming `{service_name}-{short_instance_id}.log`);
+  per-service `logging.handlers.file.filename` entries removed. Registry logs move
+  from `./logs` to `./data` (registry container now mounts `./data:/data`).
+- Registry stack config: `event_tracker.*` keys → `activity_tracker.*`.
+
 ## [1.0.0] - 2026-09-13
 
 - First stable release.
