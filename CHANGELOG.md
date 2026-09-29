@@ -15,6 +15,8 @@ Breaking upgrade to Kontiki 2.0 (JSON-only AMQP, AMQP headers without the
   per-service `logging.handlers.file.filename` entries removed. Registry logs move
   from `./logs` to `./data` (registry container now mounts `./data:/data`).
 - Registry stack config: `event_tracker.*` keys → `activity_tracker.*`.
+- Ops stack image: `kontiki-boomerang` `>=2.0.0,<3.0.0` (Kontiki 2 runtime;
+  YAML targeting and `boomerang-contracts` `>=1.0.0,<2.0.0` unchanged).
 
 ## [1.0.0] - 2026-09-13
 
