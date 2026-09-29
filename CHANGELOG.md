@@ -4,7 +4,7 @@
 
 Breaking upgrade to Kontiki 2.0 (JSON-only AMQP, AMQP headers without the
 `kontiki_` prefix, `ActivityTracker`); no change to the monitor's own surface
-(services, RPC, HTTP, alert contracts).
+(services, RPC, HTTP, alert contracts). Development status: Beta.
 
 - Requires Kontiki `>=2.0.0,<3.0.0` (JSON-only AMQP, Pydantic models serialized
   via `model_dump(mode="json")` on the bus, `AmqpDisconnectedError` unchanged for
