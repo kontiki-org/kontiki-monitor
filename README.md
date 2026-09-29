@@ -105,21 +105,16 @@ make tui
 # stack/subscription.yaml (excerpt)
 app:
   subscriptions:
-    platform-ops:          # owner_id → recipient_id at dispatch
-      demo-app-degraded:   # rule_name (subscription id under that owner)
-        status: active
-        subscription:
-          rule:
-            category: kontiki.registry
-            event_type: instance_state_changed
-            criteria:
-              all_of:
-                - key: new_state
-                  operator: eq
-                  value: degraded
-          endpoints:
-            - telegram.ops_alerts   # <channel>.<endpoint_id> → telegram_notifier endpoints.ops_alerts
-            - email.oncall         # <channel>.<endpoint_id> → email_notifier endpoints.oncall
+    demo-app-degraded:
+      category: kontiki.registry
+      event_type: instance_state_changed
+      criteria:
+        - key: new_state
+          operator: eq
+          value: degraded
+      endpoints:
+        - telegram.ops_alerts   # <channel>.<endpoint_id> → telegram_notifier endpoints.ops_alerts
+        - email.oncall         # <channel>.<endpoint_id> → email_notifier endpoints.oncall
 ```
 
 ```yaml

@@ -6,22 +6,13 @@ kontiki:
     delay: 3
 
 logging:
-  version: 1
-  disable_existing_loggers: True
-  formatters:
-    default:
-      format: "%(asctime)s - %(name)s - %(levelname)s - %(flow_id)s - %(message)s - %(filename)s:%(lineno)d"
+  directory: /data
   handlers:
     file:
-      class: logging.FileHandler
-      formatter: default
-      level: DEBUG
-  loggers:
-    kontiki:
-      handlers: ["file"]
-      level: DEBUG
-      propagate: False
+      class: logging.handlers.RotatingFileHandler
+      level: INFO
+      maxBytes: 2097152
+      backupCount: 2
   root:
-    handlers: ["file"]
-    level: DEBUG
-
+    handlers: [file]
+    level: INFO

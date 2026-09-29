@@ -299,14 +299,14 @@ uvloop = ["uvloop (>=0.15.2)"]
 
 [[package]]
 name = "boomerang-contracts"
-version = "1.0.0"
+version = "2.0.0"
 description = "Shared Boomerang alert and notification contracts."
 optional = false
 python-versions = "<4.0,>=3.11"
 groups = ["main"]
 files = [
-    {file = "boomerang_contracts-1.0.0-py3-none-any.whl", hash = "sha256:0922eaf9ee840751dff06d55014cb4c926e1f06bc270dfc586743da053a73e39"},
-    {file = "boomerang_contracts-1.0.0.tar.gz", hash = "sha256:ad046100ec8dec0f378dc9ef59840d88fcd35806cfda13a93b7c709c3bc04ba2"},
+    {file = "boomerang_contracts-2.0.0-py3-none-any.whl", hash = "sha256:9456e97d5fe2db69d3060f79a7613d5b0ba49bb5e3d92f1e0f15d9f3114fbde6"},
+    {file = "boomerang_contracts-2.0.0.tar.gz", hash = "sha256:9e13baadc5da85ae95a37543beee5547b8a21a887b17b87d27a01823c4cd3851"},
 ]
 
 [package.dependencies]
@@ -567,14 +567,14 @@ colors = ["colorama (>=0.4.6)"]
 
 [[package]]
 name = "kontiki"
-version = "1.12.0"
+version = "2.0.0"
 description = "Microservices framework in Python."
 optional = false
 python-versions = "<4.0,>=3.11"
 groups = ["main", "dev"]
 files = [
-    {file = "kontiki-1.12.0-py3-none-any.whl", hash = "sha256:1326460997ec47c8bd8ef31b156b512a3262ea0ca4756955ae4c61eb5e8a631b"},
-    {file = "kontiki-1.12.0.tar.gz", hash = "sha256:ea1f20222f7ec4f43ae845eb25e30768db5d1519e956adfd6566f1e4d7819bca"},
+    {file = "kontiki-2.0.0-py3-none-any.whl", hash = "sha256:dfb8d7b9ff66041fd8fbc08f25c275cbd24c0c0112f09519ff7ead84ac5dfd21"},
+    {file = "kontiki-2.0.0.tar.gz", hash = "sha256:3d354a326ad2859abb129d745cebee5f4bd483a7bba12def68675c86ff4b4cf7"},
 ]
 
 [package.dependencies]
@@ -1627,4 +1627,4 @@ propcache = ">=0.2.1"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11,<4.0"
-content-hash = "3e36bcf42218294ef755bf963d3a4f87cf24de736f592d420cffbb9a62ae70bd"
+content-hash = "d28cd2a03e175f4b8179bc469ab4b944b00d3c3588d7e00664c9c3cc3c064a53"

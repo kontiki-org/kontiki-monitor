@@ -1,8 +1,3 @@
-logging:
-  handlers:
-    file:
-      filename: /data/demo_app_service.log
-
 # Fast heartbeats so set_degraded (with reason) shows up quickly in the Registry.
 # registration.group defaults to business (do not set platform here).
 kontiki:

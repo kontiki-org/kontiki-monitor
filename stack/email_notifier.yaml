@@ -5,11 +5,6 @@ kontiki:
   registration:
     group: platform
 
-logging:
-  handlers:
-    file:
-      filename: /data/email_notifier_service.log
-
 app:
   email:
     smtp:
