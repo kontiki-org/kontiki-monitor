@@ -1,6 +1,6 @@
 # Changelog
 
-## [2.0.0] - Unreleased
+## [2.0.0] - 2026-90-29
 
 Breaking upgrade to Kontiki 2.0 (JSON-only AMQP, AMQP headers without the
 `kontiki_` prefix, `ActivityTracker`); no change to the monitor's own surface
