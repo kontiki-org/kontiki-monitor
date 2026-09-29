@@ -6,56 +6,34 @@ kontiki:
     group: platform
 
 app:
-  # Embedded: Registry only (no earthquake demo connector).
-  alert_connectors:
-    - kontiki-monitor
-
-  notification_channels:
-    - email-notifier-service
-    - telegram-notifier-service
-
-  # Declarative ops subscriptions (recipient_id = owner_id at dispatch).
-  # Omit criteria when category + event_type are enough (Boomerang >= 0.2.0).
+  # Declarative ops subscriptions (rule id → entry). Matching endpoints are
+  # deduplicated on (channel, endpoint_key).
   subscriptions:
-    platform-ops:
-      demo-app-degraded:
-        status: active
-        subscription:
-          rule:
-            category: kontiki.registry
-            event_type: instance_state_changed
-            criteria:
-              all_of:
-                - key: new_state
-                  operator: eq
-                  value: degraded
-          endpoints:
-            - telegram.ops_alerts
-            - email.oncall
-      registry-exceptions:
-        status: active
-        subscription:
-          rule:
-            category: kontiki.registry
-            event_type: exception_recorded
-          endpoints:
-            - telegram.ops_alerts
-            - email.oncall
-      fleet-service-missing:
-        status: active
-        subscription:
-          rule:
-            category: kontiki.registry
-            event_type: expected_service_missing
-          endpoints:
-            - telegram.ops_alerts
-            - email.oncall
-      fleet-insufficient-instances:
-        status: active
-        subscription:
-          rule:
-            category: kontiki.registry
-            event_type: insufficient_active_instances
-          endpoints:
-            - telegram.ops_alerts
-            - email.oncall
+    demo-app-degraded:
+      category: kontiki.registry
+      event_type: instance_state_changed
+      criteria:
+        - key: new_state
+          operator: eq
+          value: degraded
+      endpoints:
+        - telegram.ops_alerts
+        - email.oncall
+    registry-exceptions:
+      category: kontiki.registry
+      event_type: exception_recorded
+      endpoints:
+        - telegram.ops_alerts
+        - email.oncall
+    fleet-service-missing:
+      category: kontiki.registry
+      event_type: expected_service_missing
+      endpoints:
+        - telegram.ops_alerts
+        - email.oncall
+    fleet-insufficient-instances:
+      category: kontiki.registry
+      event_type: insufficient_active_instances
+      endpoints:
+        - telegram.ops_alerts
+        - email.oncall
