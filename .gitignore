@@ -46,4 +46,3 @@ stack/telegram_notifier.yaml.local
 
 # Local / working docs (not published)
 docs/SPEC_*.md
-docs/DEPLOYMENT_EMBEDDED.md
