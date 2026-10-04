@@ -4,206 +4,64 @@
 > small teams that need ops without the heavy stack.
 >
 > Full suite overview → https://kontiki-org.github.io/
->
-> Try it locally → [Sandbox](#sandbox--demo-app--telegram) below.
 
 
-Kontiki-monitor is a small, practical ops suite for Kontiki platforms — complete enough to run, simple enough to own.
+Kontiki-monitor watches a Kontiki platform and raises alerts.
+[Boomerang](https://github.com/kontiki-org/boomerang) delivers them (email, Telegram, …).
 
+## What it watches
 
-[Boomerang](https://github.com/kontiki-org/boomerang) is the Kontiki alerting engine:
-YAML subscriptions match normalized alerts and route them to notifiers (email, Telegram, …).
-This repository ships two Kontiki services that plug into it: they judge Registry fleet
-state, registry lifecycle events, fingerprinted registry exceptions (open/recover), and
-local disk occupation, then publish `alert.normalized` for those subscriptions and notifiers.
+**Fleet.** Declare which services must be up, and how many active instances each one needs. An alert opens when a service is missing or short of that count, and recovers when the fleet is back.
 
-| Service | CLI | Config | Role |
-|---|---|---|---|
-| `kontiki-monitor` | `kontiki-monitor` | `kontiki-monitor:` in `config/default.yaml` (+ `config/embedded.yaml`) | Fleet expectations, Registry lifecycle, fingerprinted exceptions → alerts |
-| `host-check-service` | `host-check-service` | `host-check:` in `config/host-check.yaml` | Local disk occupation (warning/critical %, paths); one instance per host |
+**Lifecycle.** An alert each time an instance registers, leaves, or changes state (degraded, down, back to active).
 
----
+**Exceptions.** The first time the Registry records an exception, an alert opens. Repeats of the same exception stay quiet. After a quiet period, the alert recovers.
+
+**Disk.** `host-check-service` watches usage on the paths you choose: warning, then critical, and a recovery once usage drops. One instance per host.
+
+Alerts for a service can be silenced; silences are kept across restarts. Open alerts can be listed.
+
+| Service | Command | Watches |
+|---|---|---|
+| `kontiki-monitor` | `kontiki-monitor` | Fleet, lifecycle, exceptions |
+| `host-check-service` | `host-check-service` | Disk on one host |
+
+Keys and a full example: [docs/configuration.md](docs/configuration.md), [docs/kontiki-monitor-config.example.yaml](docs/kontiki-monitor-config.example.yaml).
 
 ## Install
-
-**kontiki-monitor** publishes `alert.normalized` and relies on
-[Boomerang](https://github.com/kontiki-org/boomerang) for subscriptions and
-delivery (email / Telegram). Together with a Kontiki Registry and an AMQP
-broker, that is the ops path — same pattern as any other Kontiki service
-(systemd, Kubernetes, …).
 
 ```bash
 pip install kontiki-monitor kontiki-boomerang
 ```
 
-- **kontiki-monitor** ([PyPI](https://pypi.org/project/kontiki-monitor/)) —
-  `kontiki-monitor`, `host-check-service`
-- **kontiki-boomerang** ([PyPI](https://pypi.org/project/kontiki-boomerang/)) —
-  `boomerang-subscription`, `boomerang-alert-engine`,
-  `boomerang-email-notifier`, `boomerang-telegram-notifier`, …
+- [kontiki-monitor](https://pypi.org/project/kontiki-monitor/) — the two commands above
+- [kontiki-boomerang](https://pypi.org/project/kontiki-boomerang/) — subscriptions and notifiers
 
-`kontiki-monitor` only pulls `boomerang-contracts` for alert shapes; install
-Boomerang explicitly as above. Pass one or more `--config` YAML files to each
-process (Kontiki merges them). Monitor / host-check keys:
-[docs/configuration.md](docs/configuration.md) and
-[docs/kontiki-monitor-config.example.yaml](docs/kontiki-monitor-config.example.yaml).
-Boomerang config: its own
-[docs/configuration.md](https://github.com/kontiki-org/boomerang/blob/main/docs/configuration.md).
-
-Minimal sketch (same pattern on systemd, Kubernetes, …):
+Each process takes one or more `--config` YAML files. Boomerang’s own keys: [its configuration](https://github.com/kontiki-org/boomerang/blob/main/docs/configuration.md).
 
 ```bash
-kontiki-monitor --config /path/to/common.yaml --config /path/to/monitor.yaml
-host-check-service --config /path/to/common.yaml --config /path/to/host-check.yaml
-boomerang-subscription --config /path/to/common.yaml --config /path/to/subscription.yaml
-boomerang-alert-engine --config /path/to/common.yaml --config /path/to/alert_engine.yaml
-boomerang-email-notifier --config /path/to/common.yaml --config /path/to/email.yaml
-boomerang-telegram-notifier --config /path/to/common.yaml --config /path/to/telegram.yaml
+kontiki-monitor --config /path/to/monitor.yaml
+host-check-service --config /path/to/host-check.yaml
 ```
 
-To try everything without wiring your own platform, use the
-[sandbox](#sandbox--demo-app--telegram) below (Compose installs Boomerang in the
-images for you).
+A Registry and an AMQP broker sit beside them, as for any other Kontiki service.
 
----
+## Try it
 
-## Sandbox — demo-app → Telegram
-
-Local **trial stack** via Docker Compose (not a production installer). It runs:
-
-- a **demo Kontiki service** (`demo-app`) as the business workload under watch
-- the **ops stack** that watches it: Registry, **kontiki-monitor**, Boomerang
-  (subscription / alert-engine / notifiers), and MailHog (local SMTP sink so you
-  can inspect email alerts without a real mailbox)
-
-Degrade the demo app; ops get a Telegram (and email) alert.
-
-**1. Telegram bot token** (optional but needed for Telegram) — see
-[NB — Telegram bot token and chat id](#nb--telegram-bot-token-and-chat-id):
-
-```bash
-cp stack/telegram_notifier_bot_token.yaml.example \
-   stack/telegram_notifier_bot_token.yaml
-# set app.telegram.bot_token from BotFather
-```
-
-**2. Start the sandbox:**
+Docker Compose runs a demo app, the monitor, Boomerang, and a local mailbox (MailHog on `http://127.0.0.1:8025`). Telegram is optional: [bot token and chat id](docs/DEPLOYMENT_EMBEDDED.md#telegram).
 
 ```bash
 make stack-up
-```
-
-**Optional — observe with kontiki-tui** (dev dep via `poetry install`):
-
-```bash
-make tui
-```
-
-**3. Target a chat** — operator config already wired for registry `degraded` state changes:
-
-```yaml
-# stack/subscription.yaml (excerpt)
-app:
-  subscriptions:
-    demo-app-degraded:
-      category: kontiki.registry
-      event_type: instance_state_changed
-      criteria:
-        - key: new_state
-          operator: eq
-          value: degraded
-      endpoints:
-        - telegram.ops_alerts   # <channel>.<endpoint_id> → telegram_notifier endpoints.ops_alerts
-        - email.oncall         # <channel>.<endpoint_id> → email_notifier endpoints.oncall
-```
-
-```yaml
-# stack/telegram_notifier.yaml (excerpt)
-app:
-  endpoints:
-    ops_alerts:
-      chat_id: "YOUR_CHAT_ID"
-```
-
-Fleet expectation for the demo (monitor opens/recovers `insufficient` / `missing` as well):
-
-```yaml
-# config/embedded.yaml (excerpt)
-kontiki-monitor:
-  expected_services:
-    demo-app-service:
-      min_active: 1
-```
-
-**4. Trigger an alert:**
-
-```bash
 make demo-app-degrade
-# wait a few seconds (demo heartbeat is 5s)
 ```
-
-Telegram looks like this:
 
 <p align="center">
   <img src="./assets/telegram-demo-app-degraded.png" alt="Telegram notification when demo-app-service goes degraded" width="420">
 </p>
-
-Email lands in MailHog: `http://127.0.0.1:8025`.
-
-Recover and stop:
 
 ```bash
 make demo-app-recover
 make stack-down
 ```
 
----
-
-## Integration tests
-
-```bash
-make run-amqp
-make integration-test
-```
-
----
-
-## NB — Telegram bot token and chat id
-
-Needed only if you want Telegram in the sandbox (email via MailHog works without it).
-
-**Bot token**
-
-1. Open Telegram and talk to [@BotFather](https://t.me/BotFather).
-2. Send `/newbot` and follow the prompts (display name + username ending in `bot`).
-3. BotFather replies with a token like `123456:ABC-DEF...`.
-4. Put it in `stack/telegram_notifier_bot_token.yaml` (from the `.example` file):
-
-```yaml
-app:
-  telegram:
-    bot_token: "YOUR_BOT_TOKEN"
-```
-
-Keep that file local (it is gitignored).
-
-**Chat id** (where alerts are sent)
-
-1. Start a chat with your new bot (press Start), or add it to a group.
-2. Send any message in that chat.
-3. Open in a browser (replace with your token):
-
-   `https://api.telegram.org/bot<YOUR_BOT_TOKEN>/getUpdates`
-
-4. In the JSON, find `"chat":{"id": ...}` — that number is your `chat_id`
-   (for groups it is often negative).
-5. Set it in `stack/telegram_notifier.yaml`:
-
-```yaml
-app:
-  endpoints:
-    ops_alerts:
-      chat_id: "YOUR_CHAT_ID"
-```
-
-Use a string in YAML even though the value is numeric.
+What the stack runs, and how to point it at your own chat: [docs/DEPLOYMENT_EMBEDDED.md](docs/DEPLOYMENT_EMBEDDED.md).
