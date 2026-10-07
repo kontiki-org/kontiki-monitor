@@ -29,9 +29,11 @@ Runtime files used by the ops stack live under [`config/`](../config/) and
 | `kontiki-monitor.expected_services` | unset (`{}`) | Fleet expectations map. Omit / empty → no fleet poll (lifecycle / exception mapping still runs). |
 | `kontiki-monitor.exception_recover_after_seconds` | `300` | After this many seconds without a matching `registry.exception.recorded`, emit `exception_recorded` with `resolution=recovered` for that fingerprint. |
 | `kontiki-monitor.silences_path` | `silences.json` (process cwd) | JSON file for on/off silences (same shape as `list_silences`). Missing → empty set; corrupt → fail fast at setup. |
+| `kontiki-monitor.sentinel` | unset | Optional external heartbeat. Omit / empty → no POST. See below. |
 
 RPC `list_open_alerts` returns the current open `NormalizedAlert` snapshots
-(fleet + exception fingerprints), sorted by `alert_id`. In-memory only.
+(fleet, exception fingerprints, and the sentinel heartbeat), sorted by
+`alert_id`. In-memory only.
 
 Registry lifecycle events (`instance_registered`, `instance_unregistered`,
 `instance_state_changed`) map one-to-one to `alert.normalized`.
@@ -73,6 +75,41 @@ kontiki-monitor:
 
 Silences (RPC / HTTP) are runtime state persisted under `silences_path`, not
 declared in YAML.
+
+### `kontiki-monitor.sentinel`
+
+Optional block. When present, a heartbeat task calls Registry `get_services`
+and, only if that call returns, POSTs an empty body to `url` with
+`Authorization: Bearer {token}`. The client timeout is 10 seconds. A 2xx
+status is success. Any other status, a connection error, or a timeout is a
+failed POST.
+
+A failed `get_services` does not POST and does not count as a failed POST.
+
+| Key | Default | Description |
+|-----|---------|-------------|
+| `url` | *(required)* | Heartbeat URL. |
+| `token` | *(required)* | Bearer token sent on each POST. |
+| `interval_seconds` | `60` | Minimum seconds between POSTs. |
+
+Three consecutive failed POSTs publish `sentinel_unreachable` once
+(`alert_id` `sentinel:unreachable`, severity `critical`, title
+`sentinel unreachable`, `attributes.resolution=open`, `attributes.url` set to
+the configured URL). Further failures do not republish. A successful POST
+before the third failure clears the streak. The first successful POST while
+the alert is open publishes the same `alert_id` with severity `low`, title
+`sentinel recovered`, and `attributes.resolution=recovered`.
+
+The subscription catalog exposes this event type with criterion `url`
+(`eq`, `contains`).
+
+```yaml
+kontiki-monitor:
+  sentinel:
+    url: https://sentinel.example/watchdogs/prod/heartbeat
+    token: "…"
+    interval_seconds: 60
+```
 
 ---
 

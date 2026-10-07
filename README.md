@@ -17,13 +17,15 @@ Kontiki-monitor watches a Kontiki platform and raises alerts.
 
 **Exceptions.** The first time the Registry records an exception, an alert opens. Repeats of the same exception stay quiet. After a quiet period, the alert recovers.
 
+**Sentinel.** An optional heartbeat POST to an external dead-man switch, sent only after Registry `get_services` returns. Three failed posts in a row open `sentinel_unreachable`. A successful post recovers it.
+
 **Disk.** `host-check-service` watches usage on the paths you choose: warning, then critical, and a recovery once usage drops. One instance per host.
 
 Alerts for a service can be silenced; silences are kept across restarts. Open alerts can be listed.
 
 | Service | Command | Watches |
 |---|---|---|
-| `kontiki-monitor` | `kontiki-monitor` | Fleet, lifecycle, exceptions |
+| `kontiki-monitor` | `kontiki-monitor` | Fleet, lifecycle, exceptions, sentinel heartbeat |
 | `host-check-service` | `host-check-service` | Disk on one host |
 
 Keys and a full example: [docs/configuration.md](docs/configuration.md), [docs/kontiki-monitor-config.example.yaml](docs/kontiki-monitor-config.example.yaml).
