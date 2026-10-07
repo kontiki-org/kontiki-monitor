@@ -26,7 +26,7 @@ Images:
 | Image | Source |
 |---|---|
 | `kontiki-monitor:local` | this repo `Dockerfile` (`boomerang-contracts` from PyPI) |
-| `kontiki-monitor-boomerang:local` | `Dockerfile.boomerang` (`kontiki-boomerang>=0.2.0` from PyPI) |
+| `kontiki-monitor-boomerang:local` | `Dockerfile.boomerang` (`kontiki-boomerang>=2.1.0` from PyPI) |
 | `kontiki-monitor-registry:local` | `Dockerfile.kontiki-registry` (`kontiki>=1.4.0` from PyPI) |
 
 Liveness probes use registry `GET /live/<service_name>` (Kontiki 1.3+), including `GET /live/ServiceRegistry` for the registry itself.

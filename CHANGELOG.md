@@ -5,6 +5,8 @@
 - **New** Optional sentinel heartbeat (`kontiki-monitor.sentinel`): empty POST after a
   successful Registry `get_services`. Three failed POSTs open
   `sentinel_unreachable`; a success recovers it. Listed in `list_open_alerts`.
+- Ops stack image: `kontiki-boomerang` `>=2.1.0,<3.0.0` (notifier sentinel /
+  `app.sentinel`).
 
 ## [2.0.0] - 2026-09-29
 
