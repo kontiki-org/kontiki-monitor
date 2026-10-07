@@ -20,6 +20,10 @@ kontiki-monitor:
   # alert_ttl_hours: 24      # omit → no expires_at on alerts
   # exception_recover_after_seconds: 300  # quiet window before exception recover
   # silences_path: silences.json         # omit → silences.json in process cwd
+  # sentinel:                            # omit the block → no heartbeat POST
+  #   url: https://sentinel.example/watchdogs/prod/heartbeat
+  #   token: "…"                         # required when the block is present
+  #   interval_seconds: 60               # default 60
   expected_services:
     # service_name → { min_active }  (min_active defaults to 1)
     my-api-service:

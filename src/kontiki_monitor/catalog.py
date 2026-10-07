@@ -51,6 +51,12 @@ _EXCEPTION_TYPE = AlertCriterionDescriptor(
     operators=["eq", "contains"],
     value_kind="string",
 )
+_SENTINEL_URL = AlertCriterionDescriptor(
+    key="url",
+    label="Sentinel URL",
+    operators=["eq", "contains"],
+    value_kind="string",
+)
 
 
 def build_alert_subscription_catalog(
@@ -92,6 +98,11 @@ def build_alert_subscription_catalog(
                         event_type="insufficient_active_instances",
                         label="Insufficient active instances",
                         criteria=[_SERVICE_NAME],
+                    ),
+                    AlertEventTypeCatalog(
+                        event_type="sentinel_unreachable",
+                        label="Sentinel unreachable",
+                        criteria=[_SENTINEL_URL],
                     ),
                 ],
             )

@@ -21,6 +21,7 @@ from tests.integration.utils import (
 )
 from tests.support.disk_fixture import fill_mount, make_path_unavailable
 from tests.support.harness import http_request, safe_unlink
+from tests.support.mocks import SENTINEL_MOCK
 
 CATCHER = "alert-normalized-event-catcher"
 SUT_NAME = "kontiki-monitor"
@@ -270,9 +271,7 @@ def step_disk_poll_observes_mounts_filled(context):
         container_path = row["path"]
         percent = row["percent"]
         actual = fill_mount(fixture, container_path, percent)
-        assert actual >= int(
-            percent
-        ), "Mount %s filled to %s%%, expected >= %s%%" % (
+        assert actual >= int(percent), "Mount %s filled to %s%%, expected >= %s%%" % (
             container_path,
             actual,
             percent,
@@ -316,7 +315,7 @@ def step_publish_registry_event_with_payload(context, event_type):
 @when("a fleet poll observes the Service Registry returning the following services")
 def step_fleet_poll_observes_registry_services(context):
     services = json.loads(context.text.strip()) if context.text else {}
-    context.manager.get_service(REGISTRY_MOCK).set_services(services)
+    context.manager.add_remote_return_value(REGISTRY_MOCK, services)
     context.manager.clean_events(CATCHER)
     time.sleep(FLEET_TEST_POLL_INTERVAL_SECONDS + 5)
 
@@ -481,9 +480,7 @@ def step_rpc_response_includes_event_types(context):
         )
 
 
-@when(
-    "I call {method} on the kontiki-monitor on {url} with the following request"
-)
+@when("I call {method} on the kontiki-monitor on {url} with the following request")
 def step_call_http(context, method, url):
     payload = json.loads(context.text.strip()) if context.text else {}
     headers = payload.get("headers")
@@ -509,3 +506,113 @@ def step_http_response_is(context):
     expected = json.loads(context.text.strip()) if context.text else {}
     actual = _payload_as_dict(context.last_http_body)
     assert actual == expected, "Expected %s, got %s" % (expected, actual)
+
+
+_SCRIPT_STEP_TIMEOUT_SECONDS = 20
+
+
+def _wait_until(predicate, message):
+    deadline = time.time() + _SCRIPT_STEP_TIMEOUT_SECONDS
+    while time.time() < deadline:
+        if predicate():
+            return
+        time.sleep(0.05)
+    raise AssertionError(message)
+
+
+def _header_map(headers):
+    return {str(key).lower(): value for key, value in headers.items()}
+
+
+@when("a sentinel heartbeat cycle runs")
+def step_sentinel_heartbeat_cycle_runs(context):
+    context.manager.clean_events(CATCHER)
+
+
+@then(
+    "the monitor calls the RPC get_services on the Service Registry "
+    "with the following arguments"
+)
+def step_monitor_calls_get_services(context):
+    expected = json.loads(context.text.strip()) if context.text else {}
+    index = context.sentinel_rpc_index
+
+    def ready():
+        calls = context.manager.get_remote_calls(REGISTRY_MOCK) or []
+        return len(calls) > index
+
+    _wait_until(ready, "monitor did not call ServiceRegistry.get_services")
+    args, kwargs = context.manager.get_remote_calls(REGISTRY_MOCK)[index]
+    assert args == (), "Expected no positional arguments, got %s" % (args,)
+    assert kwargs == expected, "Expected arguments %s, got %s" % (expected, kwargs)
+    context.sentinel_rpc_index = index + 1
+
+
+@when("the Service Registry RPC response is")
+def step_registry_rpc_response_is(context):
+    _ = context
+
+
+@when("the Service Registry RPC call fails")
+def step_registry_rpc_call_fails(context):
+    _ = context
+
+
+@then('the monitor sends a POST request to "{url}" with the following request')
+def step_monitor_sends_post(context, url):
+    expected = json.loads(context.text.strip()) if context.text else {}
+    index = context.sentinel_http_index
+
+    def ready():
+        requests = context.manager.get_http_requests(SENTINEL_MOCK) or []
+        return len(requests) > index
+
+    _wait_until(ready, "monitor did not POST %s" % url)
+    request = context.manager.get_http_requests(SENTINEL_MOCK)[index]
+    assert request["url"] == url, "Expected POST %s, got %s" % (url, request)
+    assert request["body"] == expected.get("body", ""), "Expected body %r, got %r" % (
+        expected.get("body", ""),
+        request["body"],
+    )
+    actual_headers = _header_map(request["headers"])
+    for key, value in (expected.get("headers") or {}).items():
+        actual = actual_headers.get(str(key).lower())
+        assert actual == value, "Expected header %s=%r, got %r in %s" % (
+            key,
+            value,
+            actual,
+            request["headers"],
+        )
+    context.sentinel_http_index = index + 1
+
+
+@when("the sentinel returns status {status:d} for that POST")
+def step_sentinel_returns_status(context, status):
+    _ = context, status
+
+
+@when("the sentinel is unreachable for that POST")
+def step_sentinel_is_unreachable(context):
+    _ = context
+
+
+def _assert_no_new_sentinel_post(context, url):
+    requests = context.manager.get_http_requests(SENTINEL_MOCK) or []
+    new_requests = requests[context.sentinel_http_index :]
+    if url is None:
+        assert not new_requests, "Unexpected sentinel POST: %s" % (new_requests,)
+        return
+    matching = [item for item in new_requests if item.get("url") == url]
+    assert not matching, "Unexpected POST to %s: %s" % (url, matching)
+
+
+@then('the monitor sends no POST request to "{url}"')
+def step_monitor_sends_no_post(context, url):
+    time.sleep(1)
+    _assert_no_new_sentinel_post(context, url)
+
+
+@then("the monitor sends no sentinel heartbeat POST")
+def step_monitor_sends_no_sentinel_post(context):
+    time.sleep(2)
+    _assert_no_new_sentinel_post(context, None)
