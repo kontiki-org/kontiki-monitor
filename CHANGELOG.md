@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [2.1.0] - 2026-10-07
 
 - **New** Optional sentinel heartbeat (`kontiki-monitor.sentinel`): empty POST after a
   successful Registry `get_services`. Three failed POSTs open
