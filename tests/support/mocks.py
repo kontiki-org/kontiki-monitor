@@ -1,5 +1,13 @@
 from kontiki.messaging import Messenger, on_event, rpc
 from kontiki.testing import MockService
+from kontiki.web import http
+
+SENTINEL_MOCK = "sentinel-mock"
+SENTINEL_MOCK_PORT = 18282
+# Same URL as tests/integration/sentinel-heartbeat.feature.
+SENTINEL_HEARTBEAT_PATH = "/watchdogs/prod/heartbeat"
+SENTINEL_REGISTRY_FAIL = object()
+SENTINEL_UNREACHABLE = "unreachable"
 
 
 class NotificationPublisherMock(MockService):
@@ -35,13 +43,31 @@ class ServiceRegistryMock(MockService):
 
     name = "ServiceRegistry"
 
-    def __init__(self):
-        self.services_snapshot = {}
-
-    def set_services(self, services):
-        self.services_snapshot = services if services is not None else {}
-
     @rpc
     async def get_services(self, status=None):
         _ = status
-        return self.service_instance.services_snapshot
+        self.remote_call_manager.store_call_args()
+        value = self.remote_call_manager.get_return_value()
+        if value is SENTINEL_REGISTRY_FAIL:
+            raise RuntimeError("scripted registry failure")
+        return value
+
+
+class SentinelHttpMock(MockService):
+    name = SENTINEL_MOCK
+
+    @http(SENTINEL_HEARTBEAT_PATH, "POST")
+    async def heartbeat(self, request):
+        body = await request.read()
+        self.http_manager.store_request(
+            {
+                "url": str(request.url),
+                "headers": {str(key): value for key, value in request.headers.items()},
+                "body": body.decode("utf-8"),
+            }
+        )
+        response = self.http_manager.get_response()
+        if response == SENTINEL_UNREACHABLE:
+            request.transport.close()
+            raise ConnectionResetError("sentinel unreachable")
+        return response

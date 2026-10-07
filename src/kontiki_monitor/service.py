@@ -15,6 +15,7 @@ from kontiki_monitor.alert_mapping import (
 from kontiki_monitor.delegate import KontikiMonitorDelegate
 from kontiki_monitor.fleet_state import FLEET_POLL_INTERVAL_CONFIG_KEY
 from kontiki_monitor.names import KONTIKI_MONITOR_SERVICE_NAME
+from kontiki_monitor.sentinel import SENTINEL_HEARTBEAT_TICK_SECONDS
 
 
 class KontikiMonitorService:
@@ -111,6 +112,17 @@ class KontikiMonitorService:
                 "Publishing fleet alert.normalized event_type=%s alert_id=%s "
                 "resolution=%s",
                 alert.event_type,
+                alert.alert_id,
+                alert.attributes.get("resolution"),
+            )
+            await self._publish_alert_normalized(alert)
+
+    @task(interval=SENTINEL_HEARTBEAT_TICK_SECONDS, immediate=False)
+    async def poll_sentinel_heartbeat(self):
+        alerts = await self.delegate.poll_sentinel_heartbeat()
+        for alert in alerts:
+            logging.info(
+                "Publishing sentinel alert.normalized alert_id=%s resolution=%s",
                 alert.alert_id,
                 alert.attributes.get("resolution"),
             )
