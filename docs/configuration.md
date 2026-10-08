@@ -94,14 +94,15 @@ A failed `get_services` does not POST and does not count as a failed POST.
 
 Three consecutive failed POSTs publish `sentinel_unreachable` once
 (`alert_id` `sentinel:unreachable`, severity `critical`, title
-`sentinel unreachable`, `attributes.resolution=open`, `attributes.url` set to
-the configured URL). Further failures do not republish. A successful POST
-before the third failure clears the streak. The first successful POST while
-the alert is open publishes the same `alert_id` with severity `low`, title
-`sentinel recovered`, and `attributes.resolution=recovered`.
+`sentinel unreachable`, `attributes.resolution=open`,
+`attributes.sentinel_url` set to the configured URL). Further failures do not
+republish. A successful POST before the third failure clears the streak. The
+first successful POST while the alert is open publishes the same `alert_id`
+with severity `low`, title `sentinel recovered`, and
+`attributes.resolution=recovered`.
 
-The subscription catalog exposes this event type with criterion `url`
-(`eq`, `contains`).
+The subscription catalog exposes this event type with criterion
+`sentinel_url` (`eq`, `contains`).
 
 ```yaml
 kontiki-monitor:

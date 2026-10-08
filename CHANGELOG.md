@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+- `sentinel_unreachable` attributes use `sentinel_url` (not `url`), so notifiers
+  do not render a Details link from the heartbeat endpoint. Catalog criterion
+  renamed accordingly.
+
 ## [2.1.0] - 2026-10-07
 
 - **New** Optional sentinel heartbeat (`kontiki-monitor.sentinel`): empty POST after a

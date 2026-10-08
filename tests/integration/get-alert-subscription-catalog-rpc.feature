@@ -174,11 +174,11 @@ Feature: Expose Kontiki Registry subscription catalog via RPC
                 "label": "Sentinel unreachable",
                 "criteria": [
                   {
-                    "key": "url",
+                    "key": "sentinel_url",
                     "label": "Sentinel URL",
                     "operators": ["eq", "contains"],
                     "value_kind": "string",
-                    "attribute_key": "url"
+                    "attribute_key": "sentinel_url"
                   }
                 ]
               }

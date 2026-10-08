@@ -52,7 +52,7 @@ _EXCEPTION_TYPE = AlertCriterionDescriptor(
     value_kind="string",
 )
 _SENTINEL_URL = AlertCriterionDescriptor(
-    key="url",
+    key="sentinel_url",
     label="Sentinel URL",
     operators=["eq", "contains"],
     value_kind="string",
