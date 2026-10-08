@@ -5,6 +5,8 @@
 - `sentinel_unreachable` attributes use `sentinel_url` (not `url`), so notifiers
   do not render a Details link from the heartbeat endpoint. Catalog criterion
   renamed accordingly.
+- Registry `service_version` for `kontiki-monitor` and `host-check-service`
+  follows the `kontiki-monitor` package version (was hardcoded `0.1.0`).
 
 ## [2.1.0] - 2026-10-07
 
