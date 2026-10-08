@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [2.1.1] - 2026-10-08
 
 - `sentinel_unreachable` attributes use `sentinel_url` (not `url`), so notifiers
   do not render a Details link from the heartbeat endpoint. Catalog criterion
