@@ -171,7 +171,7 @@ Feature: Heartbeat the external sentinel when the supervision chain is up
           "body": "sentinel unreachable",
           "areas": [],
           "attributes": {
-            "url": "http://127.0.0.1:18282/watchdogs/prod/heartbeat",
+            "sentinel_url": "http://127.0.0.1:18282/watchdogs/prod/heartbeat",
             "resolution": "open"
           },
           "expires_at": null
@@ -217,7 +217,7 @@ Feature: Heartbeat the external sentinel when the supervision chain is up
             "body": "sentinel unreachable",
             "areas": [],
             "attributes": {
-              "url": "http://127.0.0.1:18282/watchdogs/prod/heartbeat",
+              "sentinel_url": "http://127.0.0.1:18282/watchdogs/prod/heartbeat",
               "resolution": "open"
             },
             "expires_at": null
@@ -257,7 +257,7 @@ Feature: Heartbeat the external sentinel when the supervision chain is up
           "body": "sentinel recovered",
           "areas": [],
           "attributes": {
-            "url": "http://127.0.0.1:18282/watchdogs/prod/heartbeat",
+            "sentinel_url": "http://127.0.0.1:18282/watchdogs/prod/heartbeat",
             "resolution": "recovered"
           },
           "expires_at": null

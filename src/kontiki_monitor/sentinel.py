@@ -76,7 +76,7 @@ class SentinelHeartbeat:
             body=title,
             areas=[],
             attributes={
-                "url": self.url,
+                "sentinel_url": self.url,
                 "resolution": resolution,
             },
             expires_at=expires_at,
