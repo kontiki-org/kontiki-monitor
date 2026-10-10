@@ -3,7 +3,8 @@
 	run-amqp down-amqp \
 	integration-test integration-test-tag \
 	stack-up stack-down tui \
-	demo-app-degrade demo-app-recover demo-app-status demo-app-raise-exception
+	demo-app-degrade demo-app-recover demo-app-status demo-app-raise-exception \
+	publish-kontiki-monitor publish-host-check
 
 PY ?= poetry run python
 SRC = src testing
@@ -65,3 +66,19 @@ demo-app-status:
 demo-app-raise-exception:
 	# Needs a rebuilt demo-app container (new RPC). Triggers registry.exception.recorded.
 	$(DEMO_APP_CLI) raise-exception
+
+# Publish one image. One tag per push, so Actions runs one workflow per service.
+# make publish-kontiki-monitor VERSION=1.0.0
+# make publish-host-check VERSION=1.0.0
+define publish_image
+	@test -n "$(VERSION)" || { echo "VERSION is required, e.g. make $@ VERSION=1.0.0" >&2; exit 1; }
+	@printf '%s' "$(VERSION)" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$$' || { echo "VERSION must be x.y.z, got: $(VERSION)" >&2; exit 1; }
+	git tag $(1)/$(VERSION)
+	git push origin $(1)/$(VERSION)
+endef
+
+publish-kontiki-monitor:
+	$(call publish_image,kontiki-monitor)
+
+publish-host-check:
+	$(call publish_image,host-check-service)
