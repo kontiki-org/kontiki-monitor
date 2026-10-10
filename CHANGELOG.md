@@ -1,5 +1,10 @@
 # Changelog
 
+Repository releases stop at 2.1.1. Each service is released as an image,
+starting at 1.0.0 (kontiki-monitor/1.0.0, host-check-service/1.0.0).
+
+## [Unreleased]
+
 ## [2.1.1] - 2026-10-08
 
 - `sentinel_unreachable` attributes use `sentinel_url` (not `url`), so notifiers

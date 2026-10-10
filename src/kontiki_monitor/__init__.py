@@ -1,3 +1,5 @@
+import os
 from importlib.metadata import version
 
-__version__ = version("kontiki-monitor")
+image_version = os.environ.get("KONTIKI_MONITOR_VERSION", "")
+__version__ = image_version or version("kontiki-monitor")

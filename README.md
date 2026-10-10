@@ -23,21 +23,16 @@ Kontiki-monitor watches a Kontiki platform and raises alerts.
 
 Alerts for a service can be silenced; silences are kept across restarts. Open alerts can be listed.
 
-| Service | Command | Watches |
-|---|---|---|
-| `kontiki-monitor` | `kontiki-monitor` | Fleet, lifecycle, exceptions, sentinel heartbeat |
-| `host-check-service` | `host-check-service` | Disk on one host |
+| Service | Image |
+|---|---|
+| [kontiki-monitor](src/kontiki_monitor/README.md) | `ghcr.io/kontiki-org/kontiki-monitor:1.0.0` |
+| [host-check-service](src/kontiki_host_check/README.md) | `ghcr.io/kontiki-org/host-check-service:1.0.0` |
+
+Those images run the two daemons. `pip install kontiki-monitor` installs the same commands.
+
+Boomerang runs from its own images. [`boomerang-contracts`](https://pypi.org/project/boomerang-contracts/) is a `pip install` for code that emits alerts.
 
 Keys and a full example: [docs/configuration.md](docs/configuration.md), [docs/kontiki-monitor-config.example.yaml](docs/kontiki-monitor-config.example.yaml).
-
-## Install
-
-```bash
-pip install kontiki-monitor kontiki-boomerang
-```
-
-- [kontiki-monitor](https://pypi.org/project/kontiki-monitor/) — the two commands above
-- [kontiki-boomerang](https://pypi.org/project/kontiki-boomerang/) — subscriptions and notifiers
 
 Each process takes one or more `--config` YAML files. Boomerang’s own keys: [its configuration](https://github.com/kontiki-org/boomerang/blob/main/docs/configuration.md).
 
