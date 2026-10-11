@@ -1,7 +1,11 @@
-"""A tag service/x.y.z publishes ghcr.io/<owner>/<service>:<version>.
+"""Resolve the service release for the publish workflow.
 
-Tags without a slash (v2.1.1) never start this workflow.
-GITHUB_REF_NAME, GITHUB_REPOSITORY_OWNER and GITHUB_OUTPUT are set by Actions.
+A tag service/x.y.z (GITHUB_REF_NAME) publishes
+ghcr.io/<owner>/<service>:<version>. Tags without a slash never start
+this workflow.
+
+workflow_dispatch sets INPUT_SERVICE and INPUT_VERSION instead of a tag.
+GITHUB_REPOSITORY_OWNER and GITHUB_OUTPUT are set by Actions.
 """
 
 import os
@@ -13,8 +17,11 @@ VERSION = re.compile(r"^[0-9]+\.[0-9]+\.[0-9]+$")
 
 
 def main():
-    ref = os.environ["GITHUB_REF_NAME"]
-    service, version = ref.split("/", 1)
+    service = os.environ.get("INPUT_SERVICE", "")
+    version = os.environ.get("INPUT_VERSION", "")
+    if not service:
+        ref = os.environ["GITHUB_REF_NAME"]
+        service, version = ref.split("/", 1)
     if not SERVICE.match(service):
         print(f"Invalid service: {service}", file=sys.stderr)
         sys.exit(1)

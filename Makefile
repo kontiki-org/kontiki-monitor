@@ -4,7 +4,8 @@
 	integration-test integration-test-tag \
 	stack-up stack-down tui \
 	demo-app-degrade demo-app-recover demo-app-status demo-app-raise-exception \
-	publish-kontiki-monitor publish-host-check
+	publish-kontiki-monitor publish-host-check \
+	build-service-package
 
 PY ?= poetry run python
 SRC = src testing
@@ -67,9 +68,15 @@ demo-app-raise-exception:
 	# Needs a rebuilt demo-app container (new RPC). Triggers registry.exception.recorded.
 	$(DEMO_APP_CLI) raise-exception
 
-# Publish one image. One tag per push, so Actions runs one workflow per service.
+# Tag service/VERSION. Actions publishes the GHCR image and the PyPI package
+# <service> at that version.
 # make publish-kontiki-monitor VERSION=1.0.0
 # make publish-host-check VERSION=1.0.0
+#
+# Build a wheel locally (does not publish). SOURCE_REF reads that tag's tree
+# so an existing image tag can get a matching package without a rebuild.
+# make build-service-package SERVICE=kontiki-monitor VERSION=1.0.0 \
+#     SOURCE_REF=kontiki-monitor/1.0.0
 define publish_image
 	@test -n "$(VERSION)" || { echo "VERSION is required, e.g. make $@ VERSION=1.0.0" >&2; exit 1; }
 	@printf '%s' "$(VERSION)" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$$' || { echo "VERSION must be x.y.z, got: $(VERSION)" >&2; exit 1; }
@@ -82,3 +89,8 @@ publish-kontiki-monitor:
 
 publish-host-check:
 	$(call publish_image,host-check-service)
+
+build-service-package:
+	@test -n "$(SERVICE)" || { echo "SERVICE is required, e.g. make $@ SERVICE=kontiki-monitor VERSION=1.0.0" >&2; exit 1; }
+	@test -n "$(VERSION)" || { echo "VERSION is required, e.g. make $@ SERVICE=kontiki-monitor VERSION=1.0.0" >&2; exit 1; }
+	SERVICE="$(SERVICE)" VERSION="$(VERSION)" SOURCE_REF="$(SOURCE_REF)" python3 .github/scripts/build_service_wheel.py
