@@ -1,17 +1,37 @@
-name: Publish image
+name: Publish service
+
+# A tag service/x.y.z publishes the GHCR image and the PyPI package
+# <service> at that version.
+#
+# workflow_dispatch publishes the PyPI package only, from the existing tag
+# service/version. It does not rebuild the image.
+#
+# Each package needs a PyPI trusted publisher for this workflow file and
+# the environment name pypi:
+#   kontiki-monitor, host-check-service.
 
 on:
   push:
     tags:
       - "*/*"
-
-permissions:
-  contents: read
-  packages: write
+  workflow_dispatch:
+    inputs:
+      service:
+        description: "kontiki-monitor or host-check-service"
+        required: true
+        type: string
+      version:
+        description: "Existing tag version x.y.z. PyPI only; the image is left as published."
+        required: true
+        type: string
 
 jobs:
   image:
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
       - uses: actions/checkout@v4
 
@@ -36,3 +56,40 @@ jobs:
             SERVICE=${{ steps.tag.outputs.service }}
             VERSION=${{ steps.tag.outputs.version }}
           tags: ${{ steps.tag.outputs.image }}
+
+  package:
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Resolve release
+        id: tag
+        env:
+          INPUT_SERVICE: ${{ github.event_name == 'workflow_dispatch' && inputs.service || '' }}
+          INPUT_VERSION: ${{ github.event_name == 'workflow_dispatch' && inputs.version || '' }}
+        run: python .github/scripts/image_tag.py
+
+      - name: Build wheel
+        env:
+          SERVICE: ${{ steps.tag.outputs.service }}
+          VERSION: ${{ steps.tag.outputs.version }}
+          SOURCE_REF: ${{ github.event_name == 'workflow_dispatch' && format('{0}/{1}', steps.tag.outputs.service, steps.tag.outputs.version) || '' }}
+        run: |
+          pip install build
+          python .github/scripts/build_service_wheel.py
+
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist
+          skip-existing: true
+          print-hash: true
