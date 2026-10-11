@@ -70,13 +70,13 @@ demo-app-raise-exception:
 
 # Tag service/VERSION. Actions publishes the GHCR image and the PyPI package
 # <service> at that version.
-# make publish-kontiki-monitor VERSION=1.0.0
+# make publish-kontiki-monitor VERSION=3.0.0
 # make publish-host-check VERSION=1.0.0
 #
 # Build a wheel locally (does not publish). SOURCE_REF reads that tag's tree
 # so an existing image tag can get a matching package without a rebuild.
-# make build-service-package SERVICE=kontiki-monitor VERSION=1.0.0 \
-#     SOURCE_REF=kontiki-monitor/1.0.0
+# make build-service-package SERVICE=kontiki-monitor VERSION=3.0.0 \
+#     SOURCE_REF=kontiki-monitor/3.0.0
 define publish_image
 	@test -n "$(VERSION)" || { echo "VERSION is required, e.g. make $@ VERSION=1.0.0" >&2; exit 1; }
 	@printf '%s' "$(VERSION)" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$$' || { echo "VERSION must be x.y.z, got: $(VERSION)" >&2; exit 1; }

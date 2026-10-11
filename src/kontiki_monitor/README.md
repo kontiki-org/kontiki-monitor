@@ -74,7 +74,7 @@ RabbitMQ and the registry come from `stack/common.services.yaml`. `config/defaul
 docker run --rm \
   -v "$PWD/stack:/stack:ro" \
   -v "$PWD/config:/config:ro" \
-  ghcr.io/kontiki-org/kontiki-monitor:1.0.0 \
+  ghcr.io/kontiki-org/kontiki-monitor:3.0.0 \
   --config /stack/common.services.yaml \
   --config /config/default.yaml \
   --config /config/embedded.yaml

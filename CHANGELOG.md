@@ -5,8 +5,8 @@
 - Each service README lists that service's configuration keys. Removes
   `docs/configuration.md` and `docs/kontiki-monitor-config.example.yaml`.
 
-**Repository releases stop at 2.1.1. Each service is released as an image,
-starting at 1.0.0** (`kontiki-monitor/1.0.0`, `host-check-service/1.0.0`).
+**Repository releases stop at 2.1.1. Each service is released as an image**
+(`kontiki-monitor/3.0.0`, `host-check-service/1.0.0`).
 
 ## [2.1.1] - 2026-10-08
 

@@ -13,7 +13,7 @@ Kontiki-monitor watches a Kontiki platform and raises alerts.
 
 | Service | Alerts | Image |
 |---|---|---|
-| [kontiki-monitor](src/kontiki_monitor/README.md) | A service missing or short of active instances. An instance that registers, leaves, or changes state. The first sight of an exception, recovered after a quiet period. Three failed sentinel heartbeats. | `ghcr.io/kontiki-org/kontiki-monitor:1.0.0` |
+| [kontiki-monitor](src/kontiki_monitor/README.md) | A service missing or short of active instances. An instance that registers, leaves, or changes state. The first sight of an exception, recovered after a quiet period. Three failed sentinel heartbeats. | `ghcr.io/kontiki-org/kontiki-monitor:3.0.0` |
 | [host-check-service](src/kontiki_host_check/README.md) | Disk usage at warning, then critical, recovered when usage drops. A path that cannot be measured. | `ghcr.io/kontiki-org/host-check-service:1.0.0` |
 
 Those images run the two daemons. `pip install kontiki-monitor` installs the same commands.
